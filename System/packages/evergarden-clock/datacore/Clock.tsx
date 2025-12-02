@@ -10,6 +10,7 @@ const { useState, useEffect } = dc;
 const clockFormat = {
     'en-US': "MMM Do, dddd",
     'zh-TW': "MMMDo dddd",
+    'ja': "MMMDo dddd",
 }
 
 function currentTime() {
@@ -24,11 +25,10 @@ function currentDayLink(locale) {
         );
 }
 
-return function Clock({ locale }) {
-    locale = locale ?? "zh-TW";  // TODO: locale is always undefined even if passed value
+return function Clock({locale = "en-US"}) {
     const [time, setTime] = useState(currentTime());
     const [link, setLink] = useState(currentDayLink(locale));
-    
+
     useEffect(() => {
         let timeoutID;
         function updateTime() {

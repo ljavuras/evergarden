@@ -180,10 +180,10 @@ class Datacore extends customJS.Violet.Package {
 
                 function addStyle(Component) {
                     if (typeof Component === "function") {
-                        return ({[Component.name]: () =>
+                        return ({[Component.name]: ({ children, ...props }) =>
                             h(Fragment, { children: [
                                 h("style", { scope: " ", children: styleContent }),
-                                h(Component)
+                                h(Component, props, ...(children ?? []))
                             ]})
                         })[Component.name];
                     } else {

@@ -4,6 +4,8 @@ tags:
 ---
 ```datacoretsx
 await cJS(({ Datacore }) => { dc = Datacore.wrap(dc); })
-
-return dc.require("evergarden-clock", "Clock");
+const Clock = await dc.require("evergarden-clock", "Clock");
+return function() {
+    return <Clock locale="zh-TW" />
+}
 ```
