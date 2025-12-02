@@ -1,0 +1,24 @@
+filters:
+  and:
+    - file.tags.contains("a/source")
+    - '!file.path.startsWith("System/")'
+formulas:
+  Year: note["library/publish/date"].year
+properties:
+  note.library/publish/date:
+    displayName: Date
+  note.library/publish/publisher:
+    displayName: Publisher
+views:
+  - type: cards
+    name: Editions
+    filters:
+      and:
+        - aliases == this.file.properties.aliases
+        - file.fullname != this.file.fullname
+    order:
+      - library/edition
+      - formula.Year
+    image: note.library/cover
+    imageAspectRatio: 1.5
+    cardSize: 120

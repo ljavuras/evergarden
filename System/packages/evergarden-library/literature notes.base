@@ -1,0 +1,48 @@
+formulas:
+  Processed: '!file.backlinks.filter(value.asFile().hasTag("zettel/permanent")).isEmpty()'
+properties:
+  file.name:
+    displayName: Note Title
+  note.literature/reference/locator:
+    displayName: Loc
+views:
+  - type: table
+    name: Ascending
+    filters:
+      and:
+        - note["literature/reference"].contains(this)
+    order:
+      - literature/reference/locator
+      - file.name
+    sort:
+      - property: literature/reference/locator
+        direction: ASC
+      - property: file.ctime
+        direction: DESC
+  - type: table
+    name: Descending
+    filters:
+      and:
+        - note["literature/reference"] == this
+    order:
+      - literature/reference/locator
+      - file.name
+    sort:
+      - property: literature/reference/locator
+        direction: DESC
+      - property: file.ctime
+        direction: DESC
+  - type: table
+    name: Unprocessed
+    filters:
+      and:
+        - note["literature/reference"] == this
+        - formula.Processed == false
+    order:
+      - literature/reference/locator
+      - file.name
+    sort:
+      - property: literature/reference/locator
+        direction: ASC
+      - property: file.ctime
+        direction: DESC

@@ -1,0 +1,130 @@
+/**
+ * A social media like widget to display conversations
+ * 
+ * @author Ljavuras <ljavuras.py@gmail.com>
+ */
+
+.block-language-dataviewjs {
+    overflow-x: unset !important;  /* Enable sticky behavior */
+}
+
+.widget-convo {
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--size-4-2);
+}
+
+.widget__top-bar {
+    position: sticky;
+    top: 0px;
+    margin-top: var(--file-margins);
+    background-color: var(--background-primary);
+    /* Hide overflow */
+    box-shadow: 0 calc(-1 * var(--file-margins)) var(--background-primary),
+                0 var(--size-4-2) var(--background-primary);
+    z-index: 1;
+}
+
+.widget-convo h2.widget-title {
+    position: absolute;
+    bottom: 100%;
+    margin-block: 0;
+}
+
+.create-convo {
+    padding: var(--size-4-2) var(--size-4-3);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--radius-m);
+    cursor: text;
+}
+
+.convo__comment-section .create-convo {
+    padding-bottom: 0;
+}
+
+.create-convo:has(:focus) {
+    border-color: var(--background-modifier-border-focus);
+}
+
+.create-convo__input {
+    margin-top: var(--size-4-1);
+    padding: unset;
+    width: 100%;
+    resize: none;
+    overflow: hidden;
+    background-color: var(--background-primary);
+    border: none;
+    border-radius: 0;
+}
+
+.create-convo__input:focus {
+    border: none;
+    background-color: var(--background-primary);
+    box-shadow: none;
+}
+
+.create-convo__submit {
+    margin-left: auto;
+}
+
+.convo {
+    cursor: default;
+}
+
+/* Top level convos */
+.widget-convo > .convo {
+    padding-bottom: var(--size-4-2);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--radius-m);
+}
+
+.convo__content {
+    padding-top: var(--size-4-2);
+}
+
+.convo__bottom {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.convo__content, .convo__bottom {
+    padding-left: var(--size-4-3);
+    padding-right: var(--size-4-3);
+}
+
+.convo__time {
+    margin-right: auto;
+    display: inline-flex;
+    align-items: center;
+    font-size: var(--font-smaller);
+    color: var(--text-muted);
+}
+
+.convo__link.clickable-icon {
+    color: var(--icon-color);
+}
+
+.convo__link.clickable-icon:hover {
+    color: var(--icon-color-hover);
+}
+
+.convo__comment-section {
+    margin-left: var(--size-4-3);
+    border-left: 1px solid var(--background-modifier-border);
+}
+
+.convo__comment-section .create-convo {
+    border: none;
+}
+
+.clickable-icon-text {
+    gap: var(--size-4-1);
+}
+
+.icon-wrap {
+    display: flex;
+}
+
+.hide {
+    display: none;
+}

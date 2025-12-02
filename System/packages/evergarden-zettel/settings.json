@@ -1,0 +1,9 @@
+{
+    "friend": {
+        "violet-templater": {
+            "folders": [
+                "template"
+            ]
+        }
+    }
+}

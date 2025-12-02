@@ -1,0 +1,28 @@
+{
+	"schemaVersion": "0.1.0",
+	"name": "YouTube Shorts",
+	"behavior": "create",
+	"noteContentFormat": "# {{selector:h2.ytShortsVideoTitleViewModelShortsVideoTitle}}\n\n![{{selector:h2.ytShortsVideoTitleViewModelShortsVideoTitle}}]({{url|replace:\"watch?v=\":\"embed/\"}})",
+	"properties": [
+		{
+			"name": "created",
+			"value": "{{time|date:\\\"YYYY-MM-DDTHH:mm:ss.SSSZ\\\"}}",
+			"type": "datetime"
+		},
+		{
+			"name": "source",
+			"value": "{{url}}",
+			"type": "text"
+		},
+		{
+			"name": "tags",
+			"value": "a/source/video/YouTube",
+			"type": "multitext"
+		}
+	],
+	"triggers": [
+		"/(https?:\\/\\/)?www.youtube.com\\/shorts\\//"
+	],
+	"noteNameFormat": "{{selector:h2.ytShortsVideoTitleViewModelShortsVideoTitle|safe_name}} - YouTube",
+	"path": ""
+}

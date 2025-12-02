@@ -1,0 +1,43 @@
+{
+	"schemaVersion": "0.1.0",
+	"name": "Reddit",
+	"behavior": "create",
+	"noteContentFormat": "[{{selector:a.subreddit-name}}](www.reddit.com/{{selector:a.subreddit-name}})\n[{{author}}](www.reddit.com/user/{{author}})\n# {{title}}\n\n{{content}}",
+	"properties": [
+		{
+			"name": "created",
+			"value": "{{time|date:\\\"YYYY-MM-DDTHH:mm:ss.SSSZ\\\"}}",
+			"type": "datetime"
+		},
+		{
+			"name": "published",
+			"value": "{{published|date:\\\"YYYY-MM-DDTHH:mm:ss.SSSZ\\\"}}",
+			"type": "datetime"
+		},
+		{
+			"name": "source",
+			"value": "{{url}}",
+			"type": "text"
+		},
+		{
+			"name": "tags",
+			"value": "a/souce/social/reddit",
+			"type": "multitext"
+		},
+		{
+			"name": "template/name",
+			"value": "[[clipper.reddit]]",
+			"type": "text"
+		},
+		{
+			"name": "template/version",
+			"value": "1",
+			"type": "number"
+		}
+	],
+	"triggers": [
+		"www.reddit.com"
+	],
+	"noteNameFormat": "{{title}} - Reddit",
+	"path": ""
+}

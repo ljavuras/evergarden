@@ -1,0 +1,16 @@
+{
+    "friend": {
+        "violet-core": {
+            "customjs": {
+                "folders": [
+                    "customjs"
+                ]
+            }
+        },
+        "violet-templater": {
+            "folders": [
+                "template"
+            ]
+        }
+    }
+}

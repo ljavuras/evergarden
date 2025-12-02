@@ -1,0 +1,35 @@
+{
+	"schemaVersion": "0.1.0",
+	"name": "YouTube",
+	"behavior": "create",
+	"noteContentFormat": "# {{schema:name}}\n\n![{{schema:name}}]({{url|replace:\"watch?v=\":\"embed/\"}})\n\n{{schema:@VideoObject:description|replace:\"\\#\":\"\\\\#\"|callout:(\"summary\",\"Description\",true)}}\n\n{{selectorHtml:ytd-engagement-panel-section-list-renderer[visibility$=\\\"EXPANDED\\\"] #segments-container|strip_tags:\"h2,ytd-transcript-segment-renderer\"|replace:\"ytd-transcript-segment-renderer\":\"li\"|markdown|callout:(\"note\",\"Transcript\",true)}}",
+	"properties": [
+		{
+			"name": "created",
+			"value": "{{time|date:\\\"YYYY-MM-DDTHH:mm:ss.SSSZ\\\"}}",
+			"type": "datetime"
+		},
+		{
+			"name": "source",
+			"value": "{{url}}",
+			"type": "text"
+		},
+		{
+			"name": "tags",
+			"value": "a/source/video/YouTube",
+			"type": "multitext"
+		}
+	],
+	"triggers": [
+		"/(https?:\\/\\/)?www.youtube.com\\/watch\\?v=/",
+		"/(https?:\\/\\/)?m.youtube.com\\/watch\\?v=/",
+		"/(https?:\\/\\/)?www.youtube.com\\/v\\//",
+		"/(https?:\\/\\/)?www.youtube.com\\/embed\\//",
+		"/(https?:\\/\\/)?www.youtube-nocookie.com\\/embed\\//",
+		"/(https?:\\/\\/)?youtu.be\\/[a-zA-Z0-9_-]{11}/",
+		"/(https?:\\/\\/)?youtu.be\\/.*\\?v=/",
+		"/(https?:\\/\\/)?youtu.be\\/live\\//"
+	],
+	"noteNameFormat": "{{schema:name|safe_name}} - YouTube",
+	"path": ""
+}

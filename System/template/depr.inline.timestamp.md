@@ -1,0 +1,1 @@
+`{{time:YYYY/MM/DD HH:mm UTCZZ}}`

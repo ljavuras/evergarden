@@ -1,0 +1,23 @@
+/**
+ * Home dashboard in Obsidian, built upon Dataview plugin
+ *
+ * @author ljavuras <ljavuras.py@gmail.com>
+ */
+
+#home__banner {
+    margin-bottom: var(--size-4-8);
+}
+
+#home__tasks {
+    margin: var(--size-4-2) 0;
+    display: flex;
+    flex-direction: row;
+    gap: var(--size-4-2);
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+#home__tasks > * {
+    margin: unset;
+    flex-grow: 1;
+}

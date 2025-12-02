@@ -1,0 +1,28 @@
+{
+	"schemaVersion": "0.1.0",
+	"name": "Gemini",
+	"behavior": "create",
+	"noteContentFormat": "\n> [!info] model: {{selector: bard-mode-switcher | markdown}}\n{{selectorHtml:*:is(user-query, model-response) | join:\"\" | replace:(\"<bard-avatar \":\"★Gemini said<bard-avatar \" , \"<user-query \":\"★You said<user-query \") | markdown | blockquote | replace:(\"> \\n> ★Gemini said\":\"\\n> [!ai-response] Gemini said\" , \"> ★You said\":\"\\n> [!ai-prompt] You said\") }}",
+	"properties": [
+		{
+			"name": "Date-Created",
+			"value": "{{date}}",
+			"type": "text"
+		},
+		{
+			"name": "tags",
+			"value": "#a/source/chat/LLM",
+			"type": "multitext"
+		},
+		{
+			"name": "URL",
+			"value": "{{url|split:\\\"?\\\"|first}}",
+			"type": "multitext"
+		}
+	],
+	"triggers": [
+		"https://gemini.google.com/app"
+	],
+	"noteNameFormat": "{{title|safe_name}} - Gemini",
+	"path": ""
+}

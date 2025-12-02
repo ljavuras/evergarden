@@ -1,0 +1,55 @@
+/**
+ * @author Ljavuras <ljavuras.py@gmail.com>
+ */
+
+.evergarden.area {
+    --evergarden-area-background: var(--evergarden-tag-background);
+    --evergarden-area-border: var(--evergarden-tag-border);
+    --evergarden-area-border-radius: var(--evergarden-tag-border-radius);
+    --evergarden-area-font-size: var(--evergarden-tag-font-size);
+    --evergarden-area-color: var(--evergarden-tag-color);
+    --evergarden-area-text-decoration: var(--evergarden-tag-text-decoration);
+    --evergarden-area-padding: var(--evergarden-tag-padding);
+    --evergarden-area-transition: var(--evergarden-tag-transition);
+    --evergarden-area-background-hover: var(--evergarden-tag-background-hover);
+    --evergarden-area-border-hover: var(--evergarden-tag-border-hover);
+    --evergarden-area-color-hover: var(--evergarden-tag-color-hover);
+}
+
+.evergarden.area .details {
+    display: grid;
+    grid-template-columns: max-content auto;
+    grid-auto-flow: row;
+    column-gap: var(--size-4-2);
+    row-gap: var(--size-4-1);
+    margin-bottom: var(--size-4-2);
+}
+
+.evergarden.area .relationship {
+    color: var(--text-muted);
+    cursor: default;
+}
+
+.evergarden.area .related-areas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--size-4-1);
+}
+
+.evergarden.area .related-areas > a.internal-link {
+    background-color: var(--evergarden-area-background);
+    border: var(--evergarden-area-border);
+    border-radius: var(--evergarden-area-border-radius);
+    color: var(--evergarden-area-color);
+    font-size: var(--evergarden-area-font-size);
+    text-decoration: var(--evergarden-area-text-decoration);
+    padding: var(--evergarden-area-padding);
+    transition: var(--evergarden-area-transition);
+}
+
+.evergarden.area .related-areas > a.internal-link:hover {
+    background-color: var(--evergarden-area-background-hover);
+    border: var(--evergarden-area-border-hover);
+    color: var(--evergarden-area-color-hover);
+    text-decoration: var(--evergarden-area-text-decoration-hover);
+}

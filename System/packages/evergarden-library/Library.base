@@ -1,0 +1,25 @@
+filters:
+  and:
+    - file.tags.contains("a/source")
+    - '!file.path.startsWith("System/")'
+formulas:
+  Available: note["library/status"] == "owned" || note["library/status"] == "borrowed"
+  Currently: note["library/status"]
+properties:
+  note.library/edition:
+    displayName: Edition
+views:
+  - type: cards
+    name: Books
+    filters:
+      and:
+        - file.tags.contains("a/source/book")
+    groupBy:
+      property: formula.Available
+      direction: DESC
+    order:
+      - library/title
+      - library/edition
+    image: note.library/cover
+    imageAspectRatio: 1.55
+    cardSize: 120

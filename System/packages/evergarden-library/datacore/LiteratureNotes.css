@@ -1,0 +1,28 @@
+/**
+ * List literature notes that link to source file that embeds this component.
+ * 
+ * @author Ljavuras <ljavuras.py@gmail.com
+ */
+
+ /* Bar above table */
+.literature-notes-header {
+    margin: var(--size-4-2);
+    color: var(--text-muted);
+}
+
+/* Table header styling */
+th.datacore-table-header-cell {
+    padding-right: var(--size-4-4);
+}
+.datacore-table-header-title {
+    display: flex;
+    gap: var(--size-4-1);
+}
+
+/* Prevent note title wrap, hide overflowed title */
+.datacore-table-row > .datacore-table-cell:nth-child(2) {
+    white-space: nowrap;
+}
+div[class^=block-language-datacore] div:has(> table.datacore-table) {
+    overflow-x: hidden;
+}

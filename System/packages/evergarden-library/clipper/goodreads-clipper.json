@@ -1,0 +1,128 @@
+{
+	"schemaVersion": "0.1.0",
+	"name": "Goodreads",
+	"behavior": "create",
+	"noteContentFormat": "# {{selector:.BookPageTitleSection__title h1}}\n```datacoretsx\nawait cJS(({Datacore}) => dc = Datacore.wrap(dc));\nconst { BookOverview } = await dc.require(\"evergarden-library\", \"Book\");\nreturn BookOverview;\n```\n{{selectorHtml:.BookPageMetadataSection__description|markdown}}\n\n## More editions\n![[editions.base]]\n\n## Literature notes\n```datacoretsx\nawait cJS(({Datacore}) => dc = Datacore.wrap(dc));\nreturn await dc.require(\"evergarden-library\", \"LiteratureNotes\");\n```",
+	"properties": [
+		{
+			"name": "created",
+			"value": "{{time|date:\\\"YYYY-MM-DDTHH:mm:ss.SSSZ\\\"}}",
+			"type": "datetime"
+		},
+		{
+			"name": "tags",
+			"value": "a/source/book",
+			"type": "multitext"
+		},
+		{
+			"name": "aliases",
+			"value": "{{selector:.BookPageTitleSection__title h1}}",
+			"type": "aliases"
+		},
+		{
+			"name": "library/title",
+			"value": "{{selector:.BookPageTitleSection__title h1}}",
+			"type": "text"
+		},
+		{
+			"name": "library/author",
+			"value": "{{schema:author[*].name|wikilink}}",
+			"type": "multitext"
+		},
+		{
+			"name": "library/genre",
+			"value": "{{selector:.BookPageMetadataSection__genres .BookPageMetadataSection__genreButton|join:\\\";\\\"|replace:\\\"/^(?=.)|;/g\\\":\\\";a-\\\"|replace:\\\"/^;/\\\":\\\"\\\"|split:\\\";\\\"|wikilink}}",
+			"type": "multitext"
+		},
+		{
+			"name": "library/edition",
+			"value": "{{schema:bookFormat|replace:\\\"http://schema.org/\\\":\\\"\\\"}}",
+			"type": "text"
+		},
+		{
+			"name": "library/length",
+			"value": "{{schema:numberOfPages}}",
+			"type": "number"
+		},
+		{
+			"name": "library/publish/date",
+			"value": "{{selector:#__NEXT_DATA__|replace:\\\"/.*BookDetails.*?\\\\\"publicationTime\\\\\":(\\d+).*/\\\":\\\"$1\\\"|date:(\\\"YYYY-MM-DD\\\",\\\"x\\\")}}",
+			"type": "date"
+		},
+		{
+			"name": "library/publish/publisher",
+			"value": "{{selector:#__NEXT_DATA__|replace:\\\"/.*BookDetails.*?\\\\\"publisher\\\\\":\\\\\"(.*?)\\\\\".*/\\\":\\\"$1\\\"}}",
+			"type": "text"
+		},
+		{
+			"name": "library/rating/community",
+			"value": "{{schema:aggregateRating.ratingValue}}",
+			"type": "number"
+		},
+		{
+			"name": "library/rating/community/count",
+			"value": "{{schema:aggregateRating.ratingCount}}",
+			"type": "number"
+		},
+		{
+			"name": "library/cover",
+			"value": "{{schema:image}}",
+			"type": "text"
+		},
+		{
+			"name": "library/isbn",
+			"value": "{{schema:isbn}}",
+			"type": "text"
+		},
+		{
+			"name": "library/language",
+			"value": "{{schema:inLanguage}}",
+			"type": "text"
+		},
+		{
+			"name": "library/series",
+			"value": "{{selector:#__NEXT_DATA__|replace:\\\"/(?:.*?\\\\\"__typename\\\\\"\\:\\\\\"Series\\\\\".*?\\\\\"title\\\\\"\\:\\\\\"(.*?)\\\\\"|^(?!.*\\\\\"__typename\\\\\"\\:\\\\\"Series\\\\\").*$)/gys\\\":\\\"$1;\\\"|replace:\\\"/(;,.*$|;$)/\\\":\\\"\\\"|split:\\\";\\\"|map:name =>\\\"${name} (Series)\\\"|template:\\\"${str};\\\"|split:\\s*;\\s*|slice:0,-1|wikilink}}",
+			"type": "multitext"
+		},
+		{
+			"name": "library/series/no",
+			"value": "{{selector:#__NEXT_DATA__|replace:\\\"/(?:.*?\\\\\"__typename\\\\\"\\:\\\\\"BookSeries\\\\\",\\\\\"userPosition\\\\\"\\:\\\\\"(.+?)\\\\\"|^(?!.*\\\\\"__typename\\\\\"\\:\\\\\"BookSeries\\\\\").*$)/gys\\\":\\\"$1;\\\"|replace:\\\"/(;,.*$|;$)/\\\":\\\"\\\"|split:\\\";\\\"}}",
+			"type": "multitext"
+		},
+		{
+			"name": "library/url/Goodreads",
+			"value": "{{url|split:\\\"?\\\"|first}}",
+			"type": "text"
+		},
+		{
+			"name": "library/file",
+			"value": "",
+			"type": "text"
+		},
+		{
+			"name": "library/rating",
+			"value": "",
+			"type": "number"
+		},
+		{
+			"name": "library/status",
+			"value": "on wishlist",
+			"type": "text"
+		},
+		{
+			"name": "library/stage",
+			"value": "to read",
+			"type": "text"
+		},
+		{
+			"name": "library/progress",
+			"value": "",
+			"type": "number"
+		}
+	],
+	"triggers": [
+		"https://www.goodreads.com/book/"
+	],
+	"noteNameFormat": "{{selector:.BookPageTitleSection__title h1|safe_name}} ({{schema:bookFormat|replace:\"http://schema.org/\":\"\"}}, {{selector:#__NEXT_DATA__|replace:\"/.*BookDetails.*?\\\"publicationTime\\\":(\\d+).*/\":\"$1\"|date:(\"YYYY\",\"x\")}})",
+	"path": ""
+}

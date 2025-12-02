@@ -1,0 +1,8 @@
+{
+    "packagesPath": "System/packages/",
+    "customjs": {
+        "folders": [
+            "customjs"
+        ]
+    }
+}

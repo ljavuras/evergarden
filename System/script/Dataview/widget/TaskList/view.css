@@ -1,0 +1,41 @@
+/**
+ * TaskList widget built upon Dataview plugin
+ *
+ * @author ljavuras <ljavuras.py@gmail.com>
+ */
+
+.widget__taskList {
+    display: inline-flex;
+    flex-direction: column;
+    padding: var(--size-4-2) var(--size-4-4);
+    margin: var(--size-4-2);
+    border: var(--border-width) solid var(--background-modifier-border);
+    border-radius: var(--radius-m);
+}
+
+.widget__taskList .widget__taskList__title {
+    margin-block: unset;
+    padding-inline: var(--size-4-1);
+}
+
+.widget__taskList .widget__taskList__content {
+    margin-block: unset;
+}
+
+.widget__taskList ul.contains-task-list {
+    margin-block: unset;
+}
+
+.widget__taskList li.dataview.task-list-item {
+    margin: 0;
+    margin-block: unset;
+    margin-inline: unset;
+}
+
+.widget__taskList li.dataview.task-list-item:hover {
+    box-shadow: none;
+}
+
+.widget__taskList li.dataview.task-list-item input {
+    margin-inline-start: unset;
+}

@@ -1,0 +1,10 @@
+/**
+ * Common css for dataview custom views
+ *
+ * @author Ljavuras <ljavuras.py@gmail.com>
+ */
+
+.icon-wrap {
+    display: flex;
+    align-items: center;
+}

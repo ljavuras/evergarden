@@ -1,0 +1,75 @@
+/**
+ * Plugin overview build upon Dataview plugin
+ * 
+ * @author ljavuras <ljavuras.py@gmail.com>
+ */
+
+.plugins__listItem {
+    display: flex;
+    padding: var(--size-2-1) var(--size-4-2);
+    justify-content: space-between;
+    flex-wrap: nowrap;
+
+}
+
+.plugins__listItem:has(.is-enabled) {
+    background-color: var(--background-secondary);
+}
+
+.plugins__listItem:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.plugins__listItem__info {
+    flex-grow: 1;
+    cursor: pointer;
+}
+
+.plugins__listItem__info__name {
+    font-size: var(--font-ui-medium);
+    font-weight: var(--font-medium);
+    color: var(--text-normal);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.plugins__listItem__info__name:hover {
+    color: var(--interactive-accent-hover);
+}
+
+.plugins__listItem__info__id {
+    display: inline-block;
+    margin-left: var(--size-4-1);
+    color: var(--text-faint);
+}
+
+.plugins__listItem__info__description {
+    color: var(--text-muted);
+}
+
+.plugins__listItem__info__description.hide {
+    display: none;
+}
+
+textarea.plugins__listItem__info__description {
+    display: block;
+    width: 100%;
+    background-color: inherit;
+    border: none;
+}
+
+.plugins__listItem__control {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.plugins__listItem__control .clickable-icon {
+    color: var(--icon-color);
+    cursor: pointer;
+}
+
+.plugins__listItem__control .clickable-icon:hover {
+    color: var(--icon-color-hover);
+    background-color: var(--background-modifier-hover);
+}

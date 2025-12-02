@@ -1,0 +1,11 @@
+{
+    "friend": {
+        "violet-core": {
+            "customjs": {
+                "folders": [
+                    "customjs"
+                ]
+            }
+        }
+    }
+}

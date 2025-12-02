@@ -1,0 +1,164 @@
+/**
+ * Template manager
+ *
+ * @author Ljavuras <ljavuras.py@gmail.com>
+ */
+
+.templates__templates-container {
+    --color-templates-update-available: var(--color-green);
+    --color-templates-missing-updater: var(--color-yellow);
+    --color-template-latest: var(--color-green);
+    --color-template-update-available: var(--color-yellow);
+    --color-template-missing-updater: var(--color-red);
+}
+
+.templates__template {
+    border-radius: var(--radius-m);
+}
+
+.templates__template.active {
+    outline: 1px solid var(--background-modifier-border);
+}
+
+.templates__template-header {
+    display: flex;
+    column-gap: var(--size-2-3);
+    padding: var(--size-4-1) var(--size-4-2);
+    border-radius: var(--radius-m);
+    color: var(--nav-item-color);
+    cursor: pointer;
+}
+
+.templates__template-header:hover {
+    color: var(--nav-item-color-hover);
+    background-color: var(--nav-item-background-hover);
+}
+
+.templates__template-name {
+    margin-right: auto;
+}
+
+.templates__template-status.update-available {
+    color: var(--color-templates-update-available);
+}
+
+.templates__template-status.missing-updater {
+    color: var(--color-templates-missing-updater);
+}
+
+.templates__progress {
+    display: flex;
+    column-gap: var(--size-2-1);
+}
+
+.templates__progress-item {
+    height: var(--size-4-1);
+}
+
+.templates__progress-item.latest {
+    background-color: var(--color-template-latest);
+}
+
+.templates__progress-item.update-available {
+    background-color: var(--color-template-update-available);
+}
+
+.templates__progress-item.missing-updater {
+    background-color: var(--color-template-missing-updater);
+}
+
+ul.templates__progress-legends {
+    display: flex;
+    column-gap: var(--size-4-2);
+    margin-block-start: var(--size-4-1);
+    margin-block-end: var(--size-4-1);
+}
+
+.templates__progress-legend::marker {
+    content: '●  ';
+    margin-right: var(--size-4-1);
+}
+
+.templates__progress-legend.latest::marker {
+    color: var(--color-template-latest);
+}
+
+.templates__progress-legend.update-available::marker {
+    color: var(--color-template-update-available);
+}
+
+.templates__progress-legend.missing-updater::marker {
+    color: var(--color-template-missing-updater);
+}
+
+.templates__progress-legend-title,
+.templates__progress-legend-count {
+    cursor: default;
+}
+
+.templates__progress-legend-count {
+    margin-left: var(--size-4-1);
+    color: var(--text-faint);
+}
+
+.templates__template-details__excerpt {
+    margin-right: auto;
+}
+
+.templates__template-details__header {
+    padding-left: var(--size-4-2);
+    display: flex;
+}
+
+.templates__template-details *:has(> .templates__note-update-btn) {
+    padding: 0;
+}
+
+.templates__notes {
+    display: grid;
+    grid-template-columns: auto auto max-content;
+}
+
+.templates__notes .templates__note {
+    display: contents;
+    color: var(--nav-item-color);
+}
+
+.templates__notes .templates__note > span {
+    padding-top: var(--size-4-1);
+    padding-bottom: var(--size-4-1);
+}
+
+.templates__notes .templates__note > *:not(:last-child) {
+    padding-right: var(--size-4-2);
+}
+
+.templates__notes .templates__note > *:first-child {
+    padding-left: var(--size-4-2);
+    border-radius: var(--radius-m) 0 0 var(--radius-m);
+}
+
+.templates__notes .templates__note > *:last-child {
+    border-radius: 0 var(--radius-m) var(--radius-m) 0;
+}
+
+.templates__notes .templates__note:hover {
+    color: var(--nav-item-color-hover);
+}
+
+.templates__notes .templates__note:hover > * {
+    background: var(--nav-item-background-hover);
+}
+
+.templates__note-title {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.templates__notes .templates__note-update-btn {
+    width: 100%;
+    height: 100%;
+    padding: var(--size-4-1) var(--size-4-2);
+    font-size: var(--font-ui-smaller);
+}

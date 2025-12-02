@@ -1,0 +1,271 @@
+/**
+ * UI for book related datacore components
+ *
+ * @author Ljavuras <ljavuras.py@gmail.com>
+ */
+ 
+/**
+ * Common variables
+ * Use Primary Theme's variable, with default fallback
+ */
+
+.evergarden.book-overview,
+.evergarden.book-series {
+    --evergarden-genre-background: var(--evergarden-tag-background);
+    --evergarden-genre-border: var(--evergarden-tag-border);
+    --evergarden-genre-border-radius: var(--evergarden-tag-border-radius);
+    --evergarden-genre-font-size: var(--evergarden-tag-font-size);
+    --evergarden-genre-color: var(--evergarden-tag-color);
+    --evergarden-genre-text-decoration: var(--evergarden-tag-text-decoration);
+    --evergarden-genre-padding: var(--evergarden-tag-padding);
+    --evergarden-genre-transition: var(--evergarden-tag-transition);
+    --evergarden-genre-background-hover: var(--evergarden-tag-background-hover);
+    --evergarden-genre-border-hover: var(--evergarden-tag-border-hover);
+    --evergarden-genre-color-hover: var(--evergarden-tag-color-hover);
+    --evergarden-genre-text-decoration-hover: var(--evergarden-tag-text-decoration-hover);
+    --evergarden-ratings-color: var(--color-orange);
+    --evergarden-ratings-background: var(--text-faint);
+    --evergarden-progress-height: var(--progress-height, var(--size-4-2));
+    --evergarden-progress-border-width: var(--progress-border-width, 1px);
+    --evergarden-progress-border-radius: var(--progress-value-radius, var(--evergarden-progress-height));
+    --evergarden-progress-background: var(--background-modifier-border);
+    --evergarden-progress-color: var(--background-modifier-success);
+    --evergarden-button-padding: var(--button-padding, var(--size-4-1) var(--size-4-3));
+}
+
+/**
+ * Book page, overview UI
+ */
+
+.evergarden.book-overview {
+    display: flex;
+    font-size: var(--font-text-size);
+    cursor: default;
+}
+
+.evergarden.book-overview .cover {
+    flex: 0 0 25%;
+}
+
+.evergarden.book-overview .overview {
+    padding: var(--size-4-2);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-4-2);
+}
+
+.evergarden.book-overview .info {
+    display: flex;
+}
+
+.evergarden.book-overview .info .col1 {
+    margin-right: auto;
+}
+
+.evergarden.book-overview .info .col2 {
+    color: var(--text-muted);
+}
+
+.evergarden.book-overview .series {
+    color: var(--text-muted);
+}
+
+.evergarden.book-overview .isbn {
+    display: flex;
+    align-items: center;
+    gap: var(--size-2-1);
+    cursor: pointer;
+}
+
+.evergarden.book-overview .isbn:hover {
+    color: var(--text-normal);
+}
+
+.evergarden.book-overview .genres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--size-4-1);
+}
+
+.evergarden.book-overview .genres > a.internal-link {
+    background-color: var(--evergarden-genre-background);
+    border: var(--evergarden-genre-border);
+    border-radius: var(--evergarden-genre-border-radius);
+    color: var(--evergarden-genre-color);
+    font-size: var(--evergarden-genre-font-size);
+    text-decoration: var(--evergarden-genre-text-decoration);
+    padding: var(--evergarden-genre-padding);
+    transition: var(--evergarden-genre-transition);
+}
+
+.evergarden.book-overview .genres > a.internal-link:hover {
+    background-color: var(--evergarden-genre-background-hover);
+    border: var(--evergarden-genre-border-hover);
+    color: var(--evergarden-genre-color-hover);
+    text-decoration: var(--evergarden-genre-text-decoration-hover);
+}
+
+.evergarden.book-overview .ratings {
+    display: flex;
+    align-items: center;
+    gap: var(--size-4-2);
+    margin-bottom: auto;
+}
+
+.evergarden.book-overview .ratings .stars,
+.evergarden.book-overview .ratings .stars .background,
+.evergarden.book-overview .ratings .stars .foreground {
+    height: var(--icon-size);
+}
+
+.evergarden.book-overview .ratings .stars {
+    display: inline-block;
+    position: relative;
+}
+
+.evergarden.book-overview .ratings .stars .background {
+    display: inline-block;
+}
+
+.evergarden.book-overview .ratings .stars .foreground {
+    top: 0;
+    position: absolute;
+}
+
+.evergarden.book-overview .ratings .star-container {
+    display: inline-block;
+    overflow: hidden;
+}
+
+.evergarden.book-overview .ratings .background svg {
+    fill: var(--evergarden-ratings-background);
+    stroke: var(--evergarden-ratings-background);
+}
+
+.evergarden.book-overview .ratings .foreground svg {
+    fill: var(--evergarden-ratings-color);
+    stroke: var(--evergarden-ratings-color);
+}
+
+.evergarden.book-overview .ratings .rating-count {
+    margin-left: var(--size-4-2);
+    color: var(--text-muted);
+    font-size: var(--font-ui-small);
+}
+
+.evergarden.book-overview .progress-label,
+.evergarden.book-series .progress-label {
+    color: var(--text-muted);
+    font-size: var(--font-ui-small);
+    text-align: right;
+    cursor: default;
+}
+
+.evergarden.book-overview .progress-label input,
+.evergarden.book-series .progress-label input {
+    padding: 0;
+    border: none;
+    color: var(--text-muted);
+    background: var(--background-primary);
+    box-shadow: none;
+}
+
+.evergarden.book-overview .progress-bar,
+.evergarden.book-series .progress-bar {
+    display: block;
+    padding: var(--evergarden-progress-border-width);
+    height: var(--evergarden-progress-height);
+    border-radius: var(--evergarden-progress-border-radius);
+    background-color: var(--evergarden-progress-background);
+}
+
+.evergarden.book-overview .progress-bar > div,
+.evergarden.book-series .progress-bar > div {
+    height: 100%;
+    max-width: 100%;
+    border-radius: var(--evergarden-progress-border-radius);
+    background-color: var(--evergarden-progress-color);
+    transition: width var(--anim-duration-moderate) var(--anim-motion-smooth);
+}
+
+.evergarden.book-overview .actions {
+    display: flex;
+    margin-top: var(--size-4-1);
+    align-items: center;
+    gap: var(--size-4-2);
+}
+
+/**
+ * Book series page
+ */
+
+.evergarden.book-series .book {
+    display: flex;
+    gap: var(--size-4-2);
+}
+
+.evergarden.book-series .series-header {
+    margin-bottom: var(--size-4-4);
+}
+
+.evergarden.book-series .series-title {
+    margin-bottom: var(--size-4-1);
+}
+
+.evergarden.book-series .series-detail {
+    color: var(--text-muted);
+}
+
+.evergarden.book-series .no-divider {
+    margin: var(--size-4-4) 0 var(--size-4-2);
+    border-top: var(--divider-width) solid var(--divider-color);
+}
+
+.evergarden.book-series .no-title {
+    margin: var(--size-4-2) 0;
+    font-size: var(--h3-size);
+    color: var(--h3-color);
+    font-weight: var(--font-weight);
+    font-style: var(--h3-style);
+    font-family: var(--h3-font);
+}
+
+.evergarden.book-series .cover {
+    flex-basis: 20%;
+    cursor: pointer;
+}
+
+.evergarden.book-series .cover img {
+    height: 100%;
+}
+
+.evergarden.book-series .info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.evergarden.book-series .title a {
+    font-size: var(--h2-size);
+    color: var(--h2-color);
+    font-weight: var(--font-weight);
+    font-style: var(--h2-style);
+    font-family: var(--h2-font);
+}
+
+.evergarden.book-series .title a:hover {
+    color: var(--h2-color);
+}
+
+.evergarden.book-series .edition {
+    color: var(--text-muted);
+    margin-bottom: auto;
+}
+
+
+.evergarden.book-series .action-bar {
+    margin-top: var(--size-4-1);
+    display: flex;
+    gap: var(--size-4-2);
+}
