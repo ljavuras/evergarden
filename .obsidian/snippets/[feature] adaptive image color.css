@@ -1,0 +1,27 @@
+/* 
+ * USAGE
+ *
+ * Invert the image when light theme is used:
+ * ![[<image>#invert-light|<size>]]
+ * ![<alt text>|<size>](https://url/to/image.jpg#invert-light)
+ *
+ * Invert the image when dark theme is used:
+ * ![[<image>#invert-dark|<size>]]
+ * ![<alt text>|<size>](https://url/to/image.jpg#invert-dark)
+ * 
+ * based on: https://forum.obsidian.md/t/auto-adaptive-images-for-dark-light-theme/13494;
+ */
+
+/* inverts image color in light theme */
+.theme-light span[src$="#invert-light"] img,
+.theme-light div[src$="#invert-light"] img,
+.theme-light img[src$="#invert-light"] {
+	filter: invert(1) hue-rotate(180deg);
+}
+
+/* inverts image color in dark theme */
+.theme-dark span[src$="#invert-dark"] img,
+.theme-dark div[src$="#invert-dark"] img,
+.theme-dark img[src$="#invert-dark"] {
+	filter: invert(1) hue-rotate(180deg);
+}

@@ -1,0 +1,8 @@
+/**
+ * Change cursor's style on non-focused pane,
+ * from red outline to accent colored outline
+ */
+.ͼo:not(.cm-focused) .cm-fat-cursor {
+	color: transparent;
+	outline-color: var(--text-muted);
+}

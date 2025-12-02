@@ -1,0 +1,4 @@
+/* Remove minimal height */
+.popover.hover-popover > .markdown-embed {
+    height: unset;
+}

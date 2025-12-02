@@ -1,0 +1,13 @@
+/**
+ * Provides various cssclass for individual notes to use
+ * ===================================================== */
+
+/* table-font-size-12 */
+.table-font-size-12 table {
+	--table-text-size: 12px;
+	--table-header-size: 12px;
+}
+
+.table-no-wrap table {
+	--table-white-space: nowrap
+}

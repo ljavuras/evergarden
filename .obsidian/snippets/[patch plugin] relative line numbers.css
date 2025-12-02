@@ -1,0 +1,25 @@
+/**
+ * Shrink gutter to take less width, and emphasizes current line number
+ *
+ * @author Ljavuras <ljavuras.py@gmail.com>
+ */
+
+/* Allows relative line numbers to align with line numbers */
+.markdown-source-view.mod-cm6 .cm-gutters {
+    position: relative;
+    padding-inline-end: 0;
+}
+
+/* Allow relative line numbers to stack on top of line numbers */
+.cm-gutter:has(> .relative-line-numbers-mono) {
+    position: absolute;
+    right: 0;  /* Align (right) relative line numbers with line numbers */
+    color: var(--text-normal) !important;  /* Emphasize current line number */
+}
+
+/* Shrink width taken by line numbers */
+.ͼ1 .cm-lineNumbers .cm-gutterElement {
+    padding-left: 0;
+    padding-right: 0;
+}
+

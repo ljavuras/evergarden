@@ -1,0 +1,68 @@
+/**
+ * Adds "H1" ~ "H6" label before headers
+ *
+ * In many themes, difference between close headers are very hard to tell,
+ * this adds labels before headers to make it clear.
+ *
+ * @author Ljavuras <ljavuras.py@gmail.com>
+ */
+
+/* 
+ * Header label content
+ * Uses a trick to select the first child that matches the class `.cm-header`:
+ * [CSS selector for first element with class - Stack Overflow](https://stackoverflow.com/questions/2717480/css-selector-for-first-element-with-class)
+ */
+.HyperMD-header > .cm-header.cm-header-1::before,
+.markdown-reading-view h1::before {
+    content: "H1";
+}
+.HyperMD-header > .cm-header.cm-header-2::before,
+.markdown-reading-view h2::before {
+    content: "H2";
+}
+.HyperMD-header > .cm-header.cm-header-3::before,
+.markdown-reading-view h3::before {
+    content: "H3";
+}
+.HyperMD-header > .cm-header.cm-header-4::before,
+.markdown-reading-view h4::before {
+    content: "H4";
+}
+.HyperMD-header > .cm-header.cm-header-5::before,
+.markdown-reading-view h5::before {
+    content: "H5";
+}
+.HyperMD-header > .cm-header.cm-header-6::before,
+.markdown-reading-view h6::before {
+    content: "H6";
+}
+.HyperMD-header > .cm-header ~ .cm-header::before {
+    content: none;
+}
+
+/*
+ * Header label style
+ */
+/* Live-preview */
+.cm-header.cm-header-1::before,
+.cm-header.cm-header-2::before,
+.cm-header.cm-header-3::before,
+.cm-header.cm-header-4::before,
+.cm-header.cm-header-5::before,
+.cm-header.cm-header-6::before,
+/* Reading view */
+.markdown-reading-view h1::before,
+.markdown-reading-view h2::before,
+.markdown-reading-view h3::before,
+.markdown-reading-view h4::before,
+.markdown-reading-view h5::before,
+.markdown-reading-view h6::before {
+    padding: 0 var(--size-4-1);
+    margin-right: var(--size-4-1);
+    vertical-align: middle;
+    /* border: 1px solid; */
+    /* border-radius: 6px; */
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+}

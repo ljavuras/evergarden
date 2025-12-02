@@ -1,0 +1,35 @@
+/**
+ *  Modifies the look of Toogl Track pane
+ *
+ *  WARNING
+ *  The class name svelte-****** is speculated to be generated
+ *  by Svelte, and could easily change between versions of the
+ *  plugin.
+ */
+
+/* Decrease font size */
+.container.svelte-11m0b0u .project-row.svelte-ywd092 {
+	font-size: 0.8em;
+}
+
+/* Prevent color legends being squashed into ovals */
+.container.svelte-11m0b0u .project-row.svelte-ywd092 .project-circle,
+.container.svelte-11m0b0u .timer #current-timer .timer-details .timer-project-circle {
+	flex-shrink: 0;
+}
+
+/** 
+ * Prevent layout stuttering when timer is ticking.
+ * Use monosapced numbers for timer.
+ */
+.container.svelte-11m0b0u .timer #current-timer .timer-details .timer-duration {
+    /*font-family: var(--font-monospace);*/
+    font-variant-numeric: tabular-nums;
+}
+
+/**
+ * Extend toggl timer's width, remove extra paddings
+ */
+.workspace-leaf-content[data-type=toggl-report] .container.svelte-11m0b0u {
+    padding: 0;
+}

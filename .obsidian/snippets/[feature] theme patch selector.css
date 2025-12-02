@@ -1,0 +1,26 @@
+/**
+ * Ljavuras' Theme Patch Selector
+ *
+ * Requires plugin [Style Settings](https://github.com/mgmeyers/obsidian-style-settings) to work
+ * 
+ * @version 0.1
+ * @author Ljavuras <ljavuras.py@gmail.com>
+ * ======================================== */
+
+/* @settings
+name: Ljavuras' Theme Patch Selector
+id: ljavuras-theme-patch-selector
+settings: 
+	-
+		id: select-patch
+		title: Select a Patch
+		description: Applies a css class to `body` element for css snippets to target.
+		type: class-select
+		allowEmpty: true
+		default: none
+		options:
+			- patch-theme-default
+			- patch-theme-minimal
+			- patch-theme-terminal
+			- patch-theme-typewriter
+ */

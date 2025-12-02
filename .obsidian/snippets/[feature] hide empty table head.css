@@ -1,0 +1,11 @@
+/**
+ * Remove empty table header
+ *
+ * @author Ljavuras <ljavuras.py@gmail.com>
+ */
+
+/* Table header */
+th:empty {
+	padding: 0;		/* Remove height */
+	border: none;	/* Remove border */
+}

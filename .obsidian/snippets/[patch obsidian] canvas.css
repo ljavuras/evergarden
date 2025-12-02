@@ -1,0 +1,10 @@
+/**
+ * Style fix for canvas.
+ *
+ * @author Ljavuras <ljavuras.py@gmail.com>
+ */
+
+/* Remove gutters, takes too much width */
+.mod-inside-iframe .cm-gutters {
+    display: none;
+}

@@ -1,0 +1,7 @@
+/* Highlight active line with border */
+body.patch-theme-typewriter.active-line-highlight .markdown-source-view .CodeMirror-activeline,
+body.patch-theme-typewriter.active-line-highlight .markdown-source-view.mod-cm6 .cm-active.cm-line {
+	background-color: unset;				/* Remove background color highlight */
+	border-radius: 0px;						/* Tone down border radius */
+	outline: 1px solid var(--text-muted);	/* Set border color */
+}

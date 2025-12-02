@@ -1,0 +1,20 @@
+/**
+ * Style fixes for plugin Kanban
+ * https://github.com/mgmeyers/obsidian-kanban
+ *
+ * Used in conjunction with kanban redesign by TheKoTech
+ * https://github.com/TheKoTech/Obsidian-Kanban-Redesign
+ *
+ * @author Ljavuras <ljavuras.py@gmail.com>
+ */
+
+/* Hide gutter */
+.kanban-plugin .cm-gutters {
+    display: none;
+}
+
+/* Vertical align single-line card contents */
+.kanban-plugin__item-title {
+    display: flex;
+    align-items: center;
+}

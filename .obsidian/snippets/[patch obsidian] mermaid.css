@@ -1,0 +1,9 @@
+/* state diagram : fix background color */
+svg.statediagram .statediagram-cluster.statediagram-cluster .inner {
+  fill: var(--background-primary) !important;
+}
+
+svg.statediagram .statediagram-cluster.statediagram-cluster-alt .inner {
+  fill: var(--background-primary-alt) !important;
+}
+

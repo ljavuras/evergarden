@@ -1,0 +1,68 @@
+/**
+ * Many issues this style sheet solves are suspected to be caused by
+ * Minimal Theme.
+ */
+
+/**
+ * Decrease margins between messages of a same dialogue participant
+ */
+.dialogue-plugin-block-wrapper.dialogue-plugin-message-wrapper-right,
+.dialogue-plugin-block-wrapper.dialogue-plugin-message-wrapper-left {
+	margin-bottom: 2px;
+}
+
+.dialogue-plugin-message-wrapper-right + .dialogue-plugin-message-wrapper-right,
+.dialogue-plugin-message-wrapper-left + .dialogue-plugin-message-wrapper-left {
+	margin-top: 2px;
+}
+
+/**
+ * Decrease visual hierarchy
+ */
+.dialogue-plugin-block-wrapper .dialogue-plugin-message-title {
+	background-color: transparent;
+	font-size: var(--font-adaptive-small);
+}
+
+/**
+ * Gives dialogue box background color
+ */
+.dialogue-plugin-block-wrapper .dialogue-plugin-message-content {
+	border-radius: 6px;
+	background-color: var(--background-primary-alt);
+	padding: 5px 10px 5px 5px;
+}
+
+/**
+ * Decrease visual hierarchy
+ */
+.dialogue-plugin-block-wrapper .dialogue-plugin-comment {
+	margin: 10px 0;
+	color: var(--text-muted);
+	font-size: var(--font-adaptive-small);
+}
+
+/**
+ * Reappear missing delimiter
+ */
+.dialogue-plugin-delimiter {
+	width: 100%;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+/**
+ * Even margin of both sides of the delimiter
+ */
+.dialogue-plugin-delimiter .dialogue-plugin-delimiter-dot {
+	display: none;
+}
+
+/**
+ * Seperate dialogue content and regular content
+ */
+.dialogue-plugin-wrapper {
+	margin: 5px 0;
+	padding: 0 8px;
+	border: solid 1px var(--background-modifier-box-shadow);
+	border-radius: 10px;
+}

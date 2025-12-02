@@ -1,0 +1,18 @@
+/**
+ * Hide tabs of sidebar, and reappear on hover, makes it a little less taxing
+ * on the eyes.
+ *
+ * @author Ljavuras <ljavuras.py@gmail.com>
+ */
+
+/* TODO: also hide .nav-header, tricker because of svgs within them */
+.workspace-split.mod-sidedock .workspace-tab-header-container,
+.workspace-split.mod-sidedock .workspace-tab-container .nav-header {
+    opacity: 0;
+    transition: opacity var(--anim-duration-moderate) var(--anim-motion-jumpy);
+}
+
+.workspace-split.mod-sidedock .workspace-tabs:hover .workspace-tab-header-container,
+.workspace-split.mod-sidedock .workspace-tabs:hover .workspace-tab-container .nav-header {
+    opacity: 1;
+}

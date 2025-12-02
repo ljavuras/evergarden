@@ -1,0 +1,23 @@
+/**
+ * Markdown View is the View object that displays markdown documents, includes
+ * reading view (markdown-preview-view) and editing view (markdown-source-view)
+ */
+
+/**
+ * Editing view
+ * - Shrink padding around the view
+ */
+.view-content > .markdown-source-view.mod-cm6 > .cm-editor > .cm-scroller {
+    padding: 8px;
+}
+/**
+ * Gutter
+ * - Shrink gutter width & fold indicator
+ */
+.markdown-source-view.mod-cm6 .cm-fold-indicator .collapse-indicator {
+    padding-right: .25rem;
+}
+
+.markdown-source-view.mod-cm6 .cm-gutters {
+    padding-inline-end: 16px;
+}

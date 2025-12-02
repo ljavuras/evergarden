@@ -1,0 +1,7 @@
+/**
+ * Fix font styles
+ * =============== */
+
+code {
+    font-family: var(--font-monospace);
+}

@@ -1,0 +1,54 @@
+/**
+ * Status Bar Improvements
+ *   - Fix status bar blocking active line
+ *   - Remove empty items
+ *   - Fix arbitrary item order
+ * ===================================== */
+
+/**
+ * Fix status bar blocking active line
+ *
+ * Make status bar full width, and doesn't float above workspace.
+ * -------------------------------------------------------------- */
+.status-bar {
+	position: unset;	/* Remove fixed position */
+	padding: 0px 4px;	/* Shrink status bar height to give workspace more space */
+	border-radius: 0;	/* Remove rounded border */
+}
+
+/**
+ * Remove empty items
+ *
+ * Empty items should not take up any space
+ * ---------------------------------------- */
+ .status-bar-item:empty {
+ 	padding: 0px;
+ }
+
+ /**
+  * Status bar item order
+  *
+  * Dafault order is determined by the order plugin registered their items,
+  * messing up the order everytime when plugins are toggled on and off.
+  *
+  * This would take users extra mental energy to find information.
+  * ----------------------------------------------------------------------- */
+/* Item orders, from left to right */
+.status-bar-item.plugin-obsidian-toggl-integration {
+	order: -10;
+}
+.status-bar-item.plugin-obsidian-git {
+	order: -4;
+}
+.status-bar-item.plugin-backlink {
+	margin-left: auto;	/* Space in between, push items to the sides */
+}
+.status-bar-item.plugin-backlink {
+	order: 8;
+}
+.status-bar-item.plugin-word-count {
+	order: 9;
+}
+.status-bar-item.plugin-obsidian-grandfather {
+	order: 10;
+}

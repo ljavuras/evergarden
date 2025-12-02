@@ -1,0 +1,11 @@
+/** 
+ * Highlight active line
+ *
+ * @author Ljavuras <ljavuras.py@gmail.com>
+ */
+
+.markdown-source-view .CodeMirror-activeline,
+.markdown-source-view.mod-cm6 .cm-active.cm-line {
+	outline: 1px solid var(--text-faint);
+	/* background-color: var(--background-secondary); */
+}

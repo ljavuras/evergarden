@@ -1,0 +1,68 @@
+/**
+ * Modify default styles of datacore components
+ *
+ * @author Ljavuras <ljavuras.py@gmail.com>
+ */
+
+div[class^=block-language-datacore] div:has(> table.datacore-table) {
+    --table-header-background: var(--datacore-table-background-color);
+    --table-column-alt-background: var(--datacore-table-background-color);
+    --table-background: var(--datacore-table-background-color);
+    --table-row-alt-background: var(--datacore-table-background-color);
+
+    --datacore-table-background-color: transparent;
+    --datacore-table-border-width: 1px;
+    --datacore-table-border-color: var(--background-modifier-border);
+    --datacore-table-border-radius: var(--radius-s);
+    --datacore-table-row-height: 30px;
+    --datacore-table-header-background-hover: var(--background-modifier-hover);
+    --datacore-table-row-background-hover: var(--bases-table-row-background-hover);
+    
+    /* Outer borders styled on parent div of table element */
+    border: var(--datacore-table-border-width) solid var(--datacore-table-border-color);
+    border-radius: var(--datacore-table-border-radius);
+}
+
+/* Remove margin, allow parent div to style its borders */
+table.datacore-table {
+    margin-block-start: 0;
+    margin-block-end: 0;
+    cursor: default;
+}
+
+/* Remove datacore thead border */
+table.datacore-table thead tr th {
+    border: none;
+}
+
+/* Grid borders */
+table.datacore-table th:not(:last-child),
+table.datacore-table td:not(:last-child) {
+    box-shadow: inset calc(-1 * var(--datacore-table-border-width)) 0 0 var(--datacore-table-border-color);
+}
+table.datacore-table thead tr,
+table.datacore-table tr:not(:last-child) {
+    box-shadow: inset 0 calc(-1 * var(--datacore-table-border-width)) 0 var(--datacore-table-border-color);
+}
+
+/* Muted smaller font within table */
+table.datacore-table thead tr th,
+table.datacore-table tbody tr td {
+    height: var(--datacore-table-row-height);
+    font-size: var(--font-smaller);
+    font-weight: var(--font-weight);
+    vertical-align: middle;
+    color: var(--text-muted);
+}
+
+/* Apply hover style to a header cell instead of the whole header row */
+table.datacore-table thead tr:hover {
+    background-color: unset;
+}
+table.datacore-table thead th:hover {
+    background-color: var(--datacore-table-header-background-hover);
+}
+
+table.datacore-table tbody tr:hover {
+    background-color: var(--datacore-table-row-background-hover) !important;
+}

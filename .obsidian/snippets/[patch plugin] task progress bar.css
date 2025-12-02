@@ -1,0 +1,14 @@
+/* Vertical align task progress bar */
+/* Remove all margin, original implementation is terrible */
+.HyperMD-header .cm-task-progress-bar {
+    margin-left: 12px;
+    margin-bottom: 0px;
+}
+.HyperMD-header .cm-task-progress-bar > * {
+    margin: 0px !important;
+}
+/* Vertical align, not perfect */
+.HyperMD-header .cm-task-progress-bar {
+    vertical-align: middle;
+    gap: 5px;
+}

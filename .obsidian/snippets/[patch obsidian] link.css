@@ -1,0 +1,33 @@
+/**
+ * Style of links
+ * ============== */
+
+/**
+ * Internal & external link styles
+ */
+
+/* Remove underline */
+.markdown-source-view.mod-cm6.is-live-preview .cm-hashtag.cm-meta,
+.markdown-source-view.mod-cm6 .cm-hmd-internal-link .cm-underline,  /* internal link */
+.markdown-source-view.mod-cm6 .cm-link .cm-underline,               /* external link */
+.markdown-source-view.mod-cm6 .cm-url .cm-underline,
+.markdown-rendered .internal-link,
+.markdown-rendered .external-link {
+	text-decoration: none;
+}
+
+/* Underline on hover */
+.internal-link:hover,
+.external-link:hover {
+	text-decoration: underline;
+}
+
+/**
+ * Fix single bracketed text in edit mode
+ */
+
+.cm-s-obsidian span.cm-hmd-barelink,
+.cm-s-obsidian span.cm-hmd-barelink:hover {
+	color: inherit;
+	text-decoration-line: inherit;
+}
