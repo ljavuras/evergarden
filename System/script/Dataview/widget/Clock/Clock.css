@@ -1,0 +1,38 @@
+/**
+ * Evergarden clock widget
+ * 
+ * @author ljavuras <ljavuras.py@gmail.com>
+ */
+
+.evergarden.clock {
+    margin: var(--size-4-2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1;
+}
+
+.evergarden.time {
+    font-size: 48px;
+}
+
+.evergarden.date {
+    font-weight: var(--font-semibold);
+    padding: var(--size-4-1);
+    border-radius: var(--radius-s);
+}
+
+.evergarden.date:hover {
+    background-color: var(--text-normal);
+}
+
+.evergarden.date .internal-link,
+.evergarden.date .internal-link.is-unresolved {
+    color: var(--text-normal);
+}
+
+.evergarden.date:hover .internal-link,
+.evergarden.date:hover .internal-link.is-unresolved {
+    color: var(--background-primary);
+    text-decoration: none;
+}
