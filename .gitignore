@@ -1,1 +1,5 @@
+# Obsidian
 .obsidian/workspace*
+
+# Free File Sync
+*.ffs_batch
