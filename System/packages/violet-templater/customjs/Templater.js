@@ -180,7 +180,7 @@ class Templater extends customJS.Violet.Package {
             (state) => {
                 if (moment(
                         state.targetFile.basename,
-                        customJS.UniqueNoteCreator.settings.format,
+                        customJS.UniqueNoteCreator?.settings.format,
                         true
                     ).isValid()) {
                     return "note.fleeting";
@@ -212,7 +212,7 @@ class Templater extends customJS.Violet.Package {
              * File name with periodic formats, checkout `customJS.Periodic`
              */
             (state) => {
-                let periodicType = customJS.Periodic.getType(
+                let periodicType = customJS.Periodic?.getType(
                     state.targetFile.basename
                 );
 
@@ -231,7 +231,7 @@ class Templater extends customJS.Violet.Package {
                     notes:   "note.project.notes",
                     meeting: "note.project.notes.meeting",
                 };
-                let project = customJS.Projects.getProjectByFile(
+                let project = customJS.Projects?.getProjectByFile(
                     state.previousFile
                 );
 
