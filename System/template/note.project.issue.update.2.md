@@ -16,7 +16,7 @@ dv.view("System/script/Dataview/project/Navigation");
 tR = tp.file.content.replace(/(\r?\n|\r)###.*$/m, new_content);
 
 tp.setFrontMatter({
-    'project/issue-tracer': new Obsidian.Link(project.issueTracker, current_path).toString(),
+    'project/issue-tracker': new Obsidian.Link(project.issueTracker, current_path).toString(),
 })
 Script.template.setVersion(tp, UPDATED_VERSION);
 -%>
