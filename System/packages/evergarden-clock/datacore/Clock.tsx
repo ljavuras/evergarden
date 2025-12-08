@@ -7,7 +7,8 @@
 const { Periodic } = await cJS();
 const { useState, useEffect } = dc;
 
-const clockFormat = {
+const dailyFormat = Periodic?.daily.format ?? "YYYY-MM-DD";
+const dateFormat = {
     'en-US': "MMM Do, dddd",
     'zh-TW': "MMMDo dddd",
     'ja': "MMMDo dddd",
@@ -19,9 +20,9 @@ function currentTime() {
 
 function currentDayLink(locale) {
     return dc.fileLink(
-            moment().format(Periodic.daily.format)
+            moment().format(dailyFormat)
         ).withDisplay(
-            moment().locale(locale).format(clockFormat[locale])
+            moment().locale(locale).format(dateFormat[locale])
         );
 }
 
