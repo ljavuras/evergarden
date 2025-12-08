@@ -1,5 +1,6 @@
 /**
- * Modify default styles of datacore components
+ * Modify default styles of datacore components to look more seamless in
+ * Obsidian.
  *
  * @author Ljavuras <ljavuras.py@gmail.com>
  */
@@ -65,4 +66,10 @@ table.datacore-table thead th:hover {
 
 table.datacore-table tbody tr:hover {
     background-color: var(--datacore-table-row-background-hover) !important;
+}
+
+/* Vertiaclly center align title elements */
+table.datacore-table .datacore-table-header-title {
+    display: flex;
+    gap: var(--size-4-1);
 }
