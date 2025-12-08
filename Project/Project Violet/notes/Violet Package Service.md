@@ -44,7 +44,7 @@ return await dc.require("evergarden-project", "Navigation");
 > [!ATTENTION]
 > **DO NOT** follow this guide, [[Violet Package Service]] is still under development, and this instruction **doesn't work** with current implementation.
 > 
-> If you wish to start developing packages now, check out *CustomJS* scripts from `evergarden-*` packages for examples and [[Project Violet#Package existing scripts]].
+> If you wish to start developing packages now, check out *CustomJS* scripts from `evergarden-*` packages for examples and [[Project Violet#Building packages]].
 
 ```js
 class CustomClass extends VPS.Package {

@@ -10,7 +10,7 @@ return await dc.require("evergarden-project", "Navigation");
 ```
 # Violet Package
 
-A package is a folder that contains user scripts (*Templater* templates, *CustomJS* scripts, *Datacore* scripts...etc), which implements a workflow. Drop the folder into your designated directory, and the workflow becomes available in your vault.
+A package is a folder that contains user scripts (*Templater* templates, *CustomJS* scripts, *Datacore* scripts...etc), implementing a workflow. Drop the folder into your designated directory, and the workflow becomes available in your vault.
 
 ## Difference between package and plugin
 
@@ -83,6 +83,8 @@ Package settings, changed by user to customize package behavior.
     }
 }
 ```
+
+##### `friend` settings
 
 Friend settings are settings exposed by friendly packages to guide their behavior. For example, this `settings.json` from package `evergarden-area`, tells `violet-datacore` that their *Datacore* scripts are under `path/to/packages/evergarden-area/datacore/`:
 
