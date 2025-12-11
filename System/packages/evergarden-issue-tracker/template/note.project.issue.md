@@ -32,8 +32,8 @@ const project = Projects.getProjectByPath(current_path);
 tR += await tp.include("[[system.common]]");  // Include common template
 Script.template.setInfo(tp);  // Template info
 tp.setFrontMatter({
-    created: issueInfo.created.toISO(),
-    'project/issue-tracker': new Obsidian.Link(project.issueTracker, current_path).toString(),
+    created                : issueInfo.created.toISO(),
+    'project/issue-tracker': new Obsidian.Link(issueInfo.issueTracker, current_path).toString(),
     'issue/no'             : issueInfo.issueNo,
     'issue/status'         : 'open',
     'issue/labels'         : issueInfo.labels,

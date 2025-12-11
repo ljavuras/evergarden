@@ -21,12 +21,12 @@ function KanbanBadge() {
     const issueFile = useRef(app.vault.getFileByPath(dc.currentPath())).current;
     const project = useProject();
 
-    const kanbanRevision = dc.useFile(project?.kanban?.path).$revision;
+    const kanbanRevision = dc.useFile(project?.kanban?.path)?.$revision;
     const kanbanRef = useRef(Kanban.get(project.kanban));
-    const cardRef = useRef(kanbanRef.current.getCardByFile(issueFile));
+    const cardRef = useRef(kanbanRef.current?.getCardByFile(issueFile));
     useEffect(() => {
         kanbanRef.current = Kanban.get(project.kanban);
-        cardRef.current = kanbanRef.current.getCardByFile(issueFile);
+        cardRef.current = kanbanRef.current?.getCardByFile(issueFile);
     }, [kanbanRevision]);
 
     let laneSuggest;
@@ -85,8 +85,8 @@ const statusIcon = {
 
 function StatusDisplay({ status }) {
     // Capitalize first letter
-    const statusText = status.charAt(0).toUpperCase() + status.slice(1);
-    return (
+    const statusText = status?.charAt(0).toUpperCase() + status?.slice(1);
+    return status && (
         <div className={"status-display status-" + status}>
             <dc.Icon icon={statusIcon[status]} />
             {statusText}
@@ -115,7 +115,7 @@ function StatusToggle({ status, setStatus }) {
 
 return function IssueToolbar() {
     const frontmatter = dc.useCurrentFile()?.$frontmatter;
-    const [status, setStatus] = useState(frontmatter["issue/status"]?.value);
+    const [status, setStatus] = useState(frontmatter?.["issue/status"]?.value);
     const labels = frontmatter?.["issue/labels"]?.value;
     return (
         <div className="issueTracker-issue">
@@ -128,8 +128,8 @@ return function IssueToolbar() {
             <div className="issue-widgets">
                 <StatusDisplay status={status} />
                 <div className="issue-info">
-                    {`#${frontmatter["issue/no"].value} opened ${
-                        frontmatter.created.value
+                    {`#${frontmatter?.["issue/no"].value} opened ${
+                        frontmatter?.created.value
                             .setLocale(options.locale)
                             .toRelativeCalendar()
                     }`}
