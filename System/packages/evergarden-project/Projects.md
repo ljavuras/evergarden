@@ -2,7 +2,7 @@
 tags:
   - is/dynamic
 ---
-# Project
+# Projects
 ```dataviewjs
 const { Projects } = await cJS();
 
