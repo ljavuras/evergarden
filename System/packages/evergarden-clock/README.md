@@ -8,7 +8,7 @@ aliases:
 
 A *Datacore* component that displays current time and a link to today's daily note.
 
-![[Clock example.png]]
+![[Clock screenshot.png]]
 
 ## Usage
 
@@ -21,6 +21,8 @@ return function() {
 }
 ```
 ````
+
+Or use the [[Clock]] provided with this package directly.
 
 ### Changing date format
 

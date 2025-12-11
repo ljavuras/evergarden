@@ -10,13 +10,24 @@ aliases:
 
 Any note that links to an *area*, i.e., `[[a-Area Name]]`, is considered part of that *area* and will appear in the *area note*.
 
-![[Area example.png]]
+![[Area screenshot.png]]
+
+Do not confuse it with the Area from PARA, it's more similar to a dynamic version of MOC (Maps of Content) or structure notes from Zettelkasten.
+
+## Usage
+
+> [!ATTENTION]
+> This guide assumes you already [[Project Violet#Usage|get packages working]]. If not, you still can make it work by copying files to their appropriate location in your vault.
+
+Create an *area* note with the template `note.area`.
+
+If you downloaded the whole [[System/README|Evergarden]] vault, clicking on any unresolved link starting with `a-`, will automatically create an *area* note for you.
 
 ## Super areas
 
 Each *area* can specify one or more *super-areas* by putting links in `area/super` property, making itself their *sub-area*. Notes tagged with an *area* will also appear in its *super-area*.
 
-![[Super-area example.png]]
+![[Super-area screenshot.png]]
 
 ## Displaying all existing areas
 
