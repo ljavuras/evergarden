@@ -4,7 +4,7 @@
  * @author ljavuras <ljavuras.py@gmail.com>
  * ======================================== */
 
-const { Obsidian, Templater } = await cJS();
+const { Obsidian, Templater, Dataview } = await cJS();
 
 /** Container HTMLElement of Issue Tracker */
 const containerEl = dv.container;
@@ -12,7 +12,7 @@ const containerEl = dv.container;
 /** User options passed through dv.view("path/to/IssueTracker", options) */
 const user_options = input;
 
-/** Expose Obsidian API */
+/** Provide Obsidian API */
 const obsidian = input.obsidian || (await cJS()).obsidian;
 
 /**
@@ -20,23 +20,19 @@ const obsidian = input.obsidian || (await cJS()).obsidian;
  */
 const default_options = {
     
-    /** Fallback for project name, use project note, or folder name if not supplied */
-    project_name: user_options?.project_note? user_options.project_note :
-                                              getCurrentFolderName(),
-
-    /** Fallback for project note, use project name, or folder name if not supplied */
-    project_note: user_options?.project_name? user_options.project_name :
-                                              getCurrentFolderName(),
+    /** Project name, use folder name as fallback */
+    project_name: user_options?.project_name ?? getCurrentFolderName(),
 
     /** Sub-folder where issue notes should go */
     issue_folder: "issues/",
 
-    /** Template name, a template that exists in templater folder, must include '.md' */
+    /** Template name, a template that exists in templater folder, must NOT include '.md' */
     issue_template: "note.project.issue",
 
     /** Default query that shows up in the search bar */
     default_query: "is:open",
 
+    /** Locale used for displaying time */
     locale: "en-US",
 };
 
@@ -83,20 +79,10 @@ class IssueTracker {
         this.config = {
             issueTracker: {
                 default_query: options.default_query,
-
-                /** A dataview link: [[path/to/issueTracker.md|Issues]] */
-                link: dv.current().file.link.withDisplay("Issues"),
+                file: Dataview.getFile(dv.current()),
             },
             project: {
                 name: options.project_name,
-
-                /** A dataview link: [[path/to/ProjectNote.md|project_name]] */
-                /** Fallbacks to options.project_name */
-                link: Obsidian.vault.getFileByName(options.project_note)?
-                    dv.page(Obsidian.vault.getFileByName(options.project_note)?.path
-                        )?.file.link
-                        .withDisplay(options.project_name) :
-                    options.project_name,
             },
             issues: {
                 folder_path:   resolvePath(getCurrentFolderPath(), options.issue_folder),
@@ -629,7 +615,7 @@ class IssueTracker {
                 // Split labels by space, respects enclosed quotations marks
                 labels:  this.labelInput.value?.match(/"[^"]+"|([^"\s]+)/g)
                              ?.map(label => label.replaceAll('"', '')),
-                issueTrackerConfig: this.issueTracker.config,
+                issueTracker: this.issueTracker.config.issueTracker.file,
             }
 
             // Handle invalid issue titles
@@ -675,11 +661,11 @@ class IssueTracker {
  */
 class IssueInfoExporter {
     constructor(newIssueInfo) {
-        this.issueNo            = newIssueInfo.issueNo;
-        this.title              = newIssueInfo.title;
-        this.labels             = newIssueInfo.labels || [];
-        this.issueTrackerConfig = newIssueInfo.issueTrackerConfig;
-        this.created            = dv.luxon.DateTime.now();
+        this.issueNo      = newIssueInfo.issueNo;
+        this.title        = newIssueInfo.title;
+        this.labels       = newIssueInfo.labels || [];
+        this.issueTracker = newIssueInfo.issueTracker;
+        this.created      = dv.luxon.DateTime.now();
 
         // Mount itself to window
         if (window.newIssueInfo) { clearTimeout(window.newIssueInfo.timeoutID); }
@@ -690,15 +676,6 @@ class IssueInfoExporter {
             delete window.newIssueInfo;
         }, 2000);
     }
-
-    /**
-     * Both `issueTrackerLink()` and `projectNoteLink()` returns a Dataview Link
-     * object, which offers various methods to mutate the link, see:
-     * 
-     * https://github.com/blacksmithgu/obsidian-dataview/blob/master/src/data-model/value.ts#L416
-     */
-    get issueTrackerLink() { return this.issueTrackerConfig.issueTracker.link; }
-    get projectNoteLink()  { return this.issueTrackerConfig.project.link; }
 }
 
 await dv.view("System/script/Dataview/project/Navigation");
