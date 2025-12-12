@@ -56,7 +56,14 @@ class Templater extends customJS.Violet.Package {
     loadConfig() {
         this.loadSettings();
 
-        this.config = { files: [], folders: [] };
+        this.config = {
+            files: Array.isArray(this.settings.files)
+                ? this.settings.files
+                : [],
+            folders: Array.isArray(this.settings.folders)
+                ? this.settings.folders
+                : []
+        };
 
         for (const [id, setting] of Object.entries(this.settings.all)) {
             this.config.files = this.config.files.concat(
