@@ -6,6 +6,11 @@
  * @author Ljavuras <ljavuras.py@gmail.com
  */
 
+/** Options */
+
+// Datacore query to locate literature notes
+const LiteratureNoteCriteria = "#zettel/literature";
+
 /**
  * Finds literature notes that links to current file. Extracts the correct
  * locator if the literature note references multiple sources.
@@ -13,13 +18,13 @@
  */
 function useLiteratureNotes() {
     const file = dc.useCurrentFile();
-    const query = `@page and $row["template/name"] = [[note.literature]]`;
+    const query = `@page and ${LiteratureNoteCriteria}`;
     const notes = dc.useQuery(query)
     .map(page => {
-        const index = page.$frontmatter["literature/reference"].value
+        const index = page.$frontmatter?.["literature/reference"]?.value
             .findIndex(link => link?.path == file.$path);
 
-        if (index == -1) {
+        if (index == -1 || isNaN(index)) {
             return null;
         } else {
             return {
@@ -79,7 +84,7 @@ function LiteratureNotes() {
                     },
                     {
                         id: "note",
-                        value: (row) => row.note,
+                        value: (row) => <dc.Link link={row.note} />,
                         title: (
                             <>
                                 <dc.Icon icon="file" />
