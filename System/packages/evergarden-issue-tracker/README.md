@@ -89,6 +89,12 @@ If a Kanban board exists for a project, you send the issue directly to the board
 ![[Send to kanban example.png]]
 ![[Change lane example.png]]
 
+#### Dataview version
+
+Issue toolbar is implemented with *Datacore* to prevent layout flickering with every edit.
+
+If you prefer the *Dataview* version of the toolbar, it is in *Evergarden* under the path `System/script/Dataview/IssueTracker/Issue`.
+
 ## Usage
 
 > [!ATTENTION]
