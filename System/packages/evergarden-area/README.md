@@ -21,7 +21,7 @@ Do not confuse it with the Area from PARA, it's more similar to a dynamic versio
 
 Create an *area* note with the template `note.area`.
 
-If you downloaded the whole [[System/README|Evergarden]] vault, clicking on any unresolved link starting with `a-`, will automatically create an *area* note for you.
+If you downloaded the whole [[System/README|Evergarden]] vault, clicking on any unresolved link starting with `a-`, will automatically create an *area* note by [[System/packages/violet-templater/README#Template resolver|template resolver]].
 
 ## Super areas
 
