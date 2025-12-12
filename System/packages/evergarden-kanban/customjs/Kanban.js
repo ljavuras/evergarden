@@ -11,8 +11,13 @@ class Kanban extends customJS.Violet.Package {
     app = customJS.app;
     _cache = new Map();
 
-    // Get cache by path, update if tfile is more recent than cache
-    get(tfile) {
+    /**
+     * Gets a Kanban object to read and write a Kanban
+     * @param {TFile} tfile - Kanban formatted Markdown file
+     * @returns {Kanban.Kanban} A Kanban object
+    */
+   get(tfile) {
+        // Get cache by path, update if tfile is more recent than cache
         if (!(tfile instanceof obsidian.TFile)) { return; }
         if (!this._cache.has(tfile.path)
             || (this._cache.get(tfile.path).mtime < tfile.stat.mtime))
@@ -155,7 +160,7 @@ class Kanban extends customJS.Violet.Package {
         }
 
         get project() {
-            return customJS.Projects.getProjectByFile(this.file);
+            return customJS.Projects?.getProjectByFile(this.file);
         }
 
         get link() {
