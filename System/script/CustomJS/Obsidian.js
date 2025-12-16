@@ -234,7 +234,7 @@ class Obsidian {
          */
         getPreviousFile() {
             return app.vault.getAbstractFileByPath(
-                app.workspace.getLastOpenFiles()[1]
+                app.workspace.getLastOpenFiles()[0]
             );
         },
 
