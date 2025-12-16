@@ -8,7 +8,7 @@ project/main: "[[Project Violet]]"
 await cJS(({ Datacore }) => dc = Datacore.wrap(dc));
 return await dc.require("evergarden-project", "Navigation");
 ```
-# Minimal working product
+# Roadmap
 
 - [ ] Sort out dependencies for all existing packages
 - [ ] [[Violet Package Service]]

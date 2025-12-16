@@ -14,10 +14,7 @@ Any note that links to an *area*, i.e., `[[a-Area Name]]`, is considered part of
 
 Do not confuse it with the Area from PARA, it's more similar to a dynamic version of MOC (Maps of Content) or structure notes from Zettelkasten.
 
-## Usage
-
-> [!ATTENTION]
-> This guide assumes you already [[Project Violet#Usage|get packages working]]. If not, you still can make it work by copying files to their appropriate location in your vault.
+## Creating an area
 
 Create an *area* note with the template `note.area`.
 

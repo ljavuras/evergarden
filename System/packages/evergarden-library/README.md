@@ -6,7 +6,7 @@ aliases:
 ---
 # Library
 
-The library package creates a complete book-reading workflow, covering collecting, reading, and taking literature notes.
+A complete book-reading workflow, including collecting, reading, and taking literature notes.
 
 ## Collecting books
 

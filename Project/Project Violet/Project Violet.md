@@ -27,9 +27,11 @@ The reverse is also true: my vault is developed to cater my own needs. It's very
 
 My solution is to create a framework that allows related scripts to be bundled into [[Violet Package|violet packages]], making sharing as simple as drag-and-drop.
 
+Ideally, provide configuration options, so users can adopt the workflow without modifying their vault or the package, [[System/packages/evergarden-periodic/README#Filename format|like this]].
+
 The final goal, is to have [[Violet Package Service]] (under development) serve as package manager, handle downloading, dependency and browsing similar to community plugins.
 
-## Usage
+## Using packages
 
 It is still in early stages of development, but foundations are established. If you wish adopt packages in your own vault or begin developing packages, follow these steps:
 
@@ -44,7 +46,7 @@ After setup, you can bundle *CustomJS scripts*, *Templater templates* and *Datac
 
 ### Building packages
 
-1. Setup `package.json` and `settings.json` described in [[Violet Package#Package format]]. Check out `evergarden-*` packages for examples of `friend` settings.
+1. Setup `package.json` and `settings.json` described in [[Violet Package#Package format|package format]]. Check out `evergarden-*` packages for examples of `friend` settings.
 2. Move related *Templater* templates, *CustomJS* scripts and *Datacore* components into your package folder and update `settings.json` accordingly. Check out `evergarden-*` packages for examples. *Templater* templates should work out of the box.
 3. *CustomJS* scripts mostly will work, except if you implement *invocable function* `invoke()` or utilize *startup scripts*. In that case, modify them as follows:
    ```js
@@ -87,8 +89,6 @@ The trick to bundling different scripts inside a package folder lies in these th
 
 Currently, *Project Violet* is only a proof of concept. It's not ready to ship, but it demonstrates a potential future of user scripting in *Obsidian*.
 
-### Future goal
+The end goal is release to [[Violet Package Service]] as community plugin and build a thriving ecosystem around it.
 
-The end goal is release [[Violet Package Service]] as community plugin and build a thriving ecosystem around it.
-
-![[Minimal working product#Minimal working product]]
+![[Roadmap#Roadmap]]

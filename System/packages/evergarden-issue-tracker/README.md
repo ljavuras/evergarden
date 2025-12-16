@@ -8,25 +8,27 @@ aliases:
 
 A working issue tracker in *Obsidian*. Each issue represented as a single note stored in a sub-folder where an issue tracker monitors.
 
+Issue can be anything that requires attention: `bug`, `issue`, `feature`, `milestone`, etc.
+
 > [!CAUTION]
 > This package is not yet fully complete. Some older implementations still relies on *Dataview* and remain in *Evergarden*:
 > 
 > - Issue Tracker: `System/script/Dataview/IssueTracker/`
 > - Project Navigation Bar: `System/script/Dataview/project/Navigation/`
 
-## Directory layout
+## Directory structure
 
 This is the default layout when used with [[System/packages/evergarden-project/README|Project]]. Issues ares stored in `issues/`, and Kanban file is provided by `evergarden-project` so that issues can be sent directly to the Kanban board.
 
 ```powershell
-.
+.                                     # Vault root
 └── Project
     └── Project Name
         ├── issues/                   # Issue notes
-        ├── notes/                    # Project notes
+        ├── notes/
         ├── Project Name.md           # Project main note
-        ├── Issues - Project Name.md  # Porject issue tracker
-        └── Kanban - Project Name.md  # Project kanban
+        ├── Issues - Project Name.md  # Issue tracker
+        └── Kanban - Project Name.md
 ```
 
 ## Features
@@ -89,16 +91,16 @@ If a Kanban board exists for a project, you send the issue directly to the board
 ![[Send to kanban example.png]]
 ![[Change lane example.png]]
 
-#### Dataview version
+#### Dataview version of issue toolbar
 
 Issue toolbar is implemented with *Datacore* to prevent layout flickering with every edit.
 
 If you prefer the *Dataview* version of the toolbar, it is in *Evergarden* under the path `System/script/Dataview/IssueTracker/Issue`.
 
-## Usage
+## Using the issue tracker
 
 > [!ATTENTION]
-> This guide assumes you already [[Project Violet#Usage|get packages working]]. If not, you can manually copy files to their appropriate locations in your vault.
+> This guide assumes you already [[Project Violet#Using packages|get packages working]]. If not, you can manually copy files to their appropriate locations in your vault.
 
 ### Using it with `evergarden-project` package (Recommended)
 

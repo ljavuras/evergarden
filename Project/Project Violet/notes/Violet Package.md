@@ -39,8 +39,7 @@ A package is a folder that contains user scripts (*Templater* templates, *Custom
         - Path
         - Tag
         - Frontmatter
-        - Definition of certain type of file
-        - Measure to query files of certain type
+        - Ways to identify and query files
 
 ### Package format
 

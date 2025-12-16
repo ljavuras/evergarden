@@ -54,7 +54,7 @@ UI and workflow should look and feel native to *Obsidian*. Familiar, consistent 
 
 Everything related to operating the vault goes into `System/`, thus *Evergarden* is mostly a mirror of `System/` folder from my working vault.
 
-Contents generally goes in the root folder `/`, unless it's highly structured and unambiguous, e.g., `Project/` and `Periodic/`. Non-text content goes into `Attachment/`.
+Contents generally goes in the root folder `/`, unless it's highly structured and unambiguous, e.g., `Project/` and [[System/packages/evergarden-periodic/README#Folder structure|Periodic/]]. Non-text content goes into `Attachment/`.
 
 ```powershell
 .
@@ -131,7 +131,7 @@ Take the *Project* feature (`evergarden-project`), as an example. The full workf
 
 Previously, anyone who wanted to adopt this workflow had to copy files to three separate locations, and adjust the *Datacore* `dc.require` path inside templates, which is tedious and error-prone. With [[Project Violet]], you simply drop the package folder into your designated packages directory, and everything just works.
 
-You can start [[Project Violet#Building packages]] right now, as the [[Violet Package#Package format]] is expected to remain relatively stable far into the [[Project Violet#Future goal|future]].
+You can start [[Project Violet#Building packages|building packages]] right now, as the [[Violet Package#Package format|package format]] is expected to remain relatively stable for the foreseeable future.
 
 ## Tags and properties
 
@@ -144,5 +144,5 @@ You can start [[Project Violet#Building packages]] right now, as the [[Violet Pa
 
 - To gain early feedback on [[Project Violet]] and [[Project Violet#State of the project|guide its development]]. So do reach out because I'd love to hear your thoughts!
 - I've already [[#Goals|sunk time]] into building it. Sharing the product may help others, makes my time spent a little more worthwhile.
-- [[Project Violet#Usage|Package dependencies]] aren't fully sorted out yet, publishing the whole vault ensures everything work, so people can start playing with it.
+- [[Project Violet#Using packages|Package dependencies]] aren't fully sorted out yet, publishing the whole vault ensures everything work, so people can start playing with it.
 - To invite people to [[Project Violet#Building packages|join]] the [[Project Violet#Future goal|ecosystem]], and maybe even developing packages that fit straight into my vault.

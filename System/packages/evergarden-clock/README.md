@@ -10,7 +10,9 @@ A *Datacore* component that displays current time and a link to today's daily no
 
 ![[Clock screenshot.png]]
 
-## Usage
+## Using the clock
+
+Use the [[Clock]] provided with this package directly, or use the component in your *Datacore* code block:
 
 ````
 ```datacoretsx
@@ -22,7 +24,9 @@ return function() {
 ```
 ````
 
-Or use the [[Clock]] provided with this package directly.
+### Properties
+
+- `locale`: The language and date format of the clock's date.
 
 ### Changing date format
 
@@ -41,13 +45,13 @@ You can lookup available locales [here](https://github.com/moment/moment/tree/de
 
 ### Linking daily notes
 
-If you aren't using `customJS.Periodic` from `evergarden-periodic`, update the following line in `Clock.tsx` to match the filename format of your daily notes:
+If you aren't using [[System/packages/evergarden-periodic/README|evergarden-periodic]], update the following line in `Clock.tsx` to match the filename format of your daily notes:
 
 ```js
 const dailyFormat = Periodic?.daily.format ?? "YYYY-MM-DD";  // Change "YYYY-MM-DD" to your daily note format
 ```
 
-Again, check out available formats in [Moment.js docs](https://momentjs.com/docs/#/displaying/format/).
+Check out available formats in [Moment.js docs](https://momentjs.com/docs/#/displaying/format/).
 
 ## Dataview version
 

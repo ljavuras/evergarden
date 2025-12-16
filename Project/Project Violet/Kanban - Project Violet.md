@@ -9,7 +9,7 @@ template/version: 1
 
 ## Backlog
 
-- [ ] Publish a [[Minimal working product]]
+- [ ] Publish a [[Roadmap]]
 
 
 ## Ready
