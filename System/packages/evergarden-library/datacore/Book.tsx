@@ -72,34 +72,28 @@ function Authors({ authors }) {
 }
 
 function AutoResizingTextInput({ value, minWidth, onChange }) {
-    const [inputValue, setInputValue] = useState(value);
     const [width, setWidth] = useState(0);
-    const inputRef = useRef(null);
     const spanRef = useRef(null);
 
     useEffect(() => {
-        if (spanRef.current && inputRef.current) {
+        if (spanRef.current) {
             setWidth(Math.max(
                 minWidth ?? 0,
                 spanRef.current.offsetWidth
             ));
         }
-    }, [inputValue]);
+    }, [value, minWidth]);
 
     return (
         <>
             <input
                 type="text"
-                ref={inputRef}
-                value={inputValue}
+                value={value}
                 style={{ width }}
-                onChange={(event) => {
-                    onChange(event);
-                    setInputValue(event.target.value);
-                }}
+                onChange={onChange}
                 onKeyUp={(event) => {
                     // Unfocus when Enter is pressed
-                    if (event.keyCode == 13) {
+                    if (event.key == "Enter") {
                         event.preventDefault();
                         event.target.blur();
                     }
@@ -112,7 +106,7 @@ function AutoResizingTextInput({ value, minWidth, onChange }) {
                     position: "absolute",
                     whiteSpace: "nowrap",
                 }}
-            >{inputValue}</span>
+            >{value}</span>
         </>
     )
 }
