@@ -60,6 +60,39 @@ class Periodic extends customJS.Violet.Package {
 
     onload() {
         this.commands.forEach(cmd => this.addCommand(cmd));
+
+        this.loadSettings();
+        this.yearly    = new this.PeriodicType(this, "year");
+        this.quarterly = new this.PeriodicType(this, "quarter");
+        this.monthly   = new this.PeriodicType(this, "month");
+        this.weekly    = new this.PeriodicType(this, "week");
+        this.daily     = new this.PeriodicType(this, "day",
+            function() {
+
+                /**
+                 * Renders project schedule for daily log
+                 * @param {DataViewInlineAPI} dv - Contains Dataview API and the
+                 * HTMLElement conatiner that Dataview renders to
+                 * @deprecated since 2024/06/01.
+                 * @todo remove `renderProjectSchedule` and `Projects.getSchedule`
+                 * after updated daily notes before 2023/06/25
+                 */
+                this.renderProjectSchedule = function(dv) {
+                        let period = dv.current().file.name;
+                        dv.taskList(customJS.Projects.getSchedule(period));
+                        dv.header(4, "Overdue");
+                        dv.taskList(customJS.Projects.getSchedule(period, true));
+                };
+            }
+        );
+
+        this.periodicTypes = [
+            this.yearly,
+            this.quarterly,
+            this.monthly,
+            this.weekly,
+            this.daily,
+        ];
     }
     
     /**
@@ -186,7 +219,7 @@ class Periodic extends customJS.Violet.Package {
             this.type     = (unit == "day")? "daily" : `${unit}ly`;
             this.unit     = unit;
             this.units    = `${unit}s`;
-            this.format   = format;
+            this.format   = periodic.settings.format[this.type];
             this.path     = `${periodic.path}/${this.type}`;
             this.template = `note.periodic.${this.type}`;
 
@@ -202,20 +235,35 @@ class Periodic extends customJS.Violet.Package {
         }
     }
 
+    /**
+     * Represents a periodic note.
+     */
     Periodic = class {
-        constructor(string) {
-            this.type = customJS.Periodic.getType(string);
-            this._string = string;
+        /**
+         * @param {string} period - Filename of a periodic note
+         */
+        constructor(period) {
+            this.type = customJS.Periodic.getType(period);
+            this._string = period;
         }
 
+        /**
+         * Does periodic_string matches a periodic note?
+         * @returns {boolean}
+         */
         isValid() {
             return !!this.type;
         }
 
-        includes(string) {
+        /**
+         * Answers questions like: Is 2025-12-04 in 2025-W50?
+         * @param {string} period - A string that represents a period of time
+         * @returns {boolean}
+         */
+        includes(period) {
             if (!this.isValid) { return false; }
 
-            return moment(string).isBetween(
+            return moment(period).isBetween(
                 moment(this._string, this.type.format),
                 moment(this._string, this.type.format).endOf(this.type.unit),
                 undefined,
@@ -223,6 +271,10 @@ class Periodic extends customJS.Violet.Package {
             );
         }
 
+        /**
+         * A Dataview page object of this periodic note
+         * @returns {SMarkdownPage}
+         */
         get page() {
             return this.isValid()?
                 customJS.Dataview.api.page(
@@ -231,36 +283,4 @@ class Periodic extends customJS.Violet.Package {
                 false;
         }
     }
-
-    yearly    = new this.PeriodicType(this, "year",    "YYYY",       );
-    quarterly = new this.PeriodicType(this, "quarter", "YYYY-[Q]Q",  );
-    monthly   = new this.PeriodicType(this, "month",   "YYYY-MM",    );
-    weekly    = new this.PeriodicType(this, "week",    "gggg-[W]ww", );
-    daily     = new this.PeriodicType(this, "day",     "YYYY-MM-DD",
-        function() {
-
-            /**
-             * Renders project schedule for daily log
-             * @param {DataViewInlineAPI} dv - Contains Dataview API and the
-             * HTMLElement conatiner that Dataview renders to
-             * @deprecated since 2024/06/01.
-             * @todo remove `renderProjectSchedule` and `Projects.getSchedule`
-             * after updated daily notes before 2023/06/25
-             */
-            this.renderProjectSchedule = function(dv) {
-                    let period = dv.current().file.name;
-                    dv.taskList(customJS.Projects.getSchedule(period));
-                    dv.header(4, "Overdue");
-                    dv.taskList(customJS.Projects.getSchedule(period, true));
-            };
-        }
-    );
-
-    periodicTypes = [
-        this.yearly,
-        this.quarterly,
-        this.monthly,
-        this.weekly,
-        this.daily,
-    ];
 }

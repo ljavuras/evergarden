@@ -1,4 +1,11 @@
 {
+    "format": {
+        "yearly": "YYYY",
+        "quarterly": "YYYY-[Q]Q",
+        "monthly": "YYYY-MM",
+        "weekly": "gggg-[W]ww",
+        "daily": "YYYY-MM-DD"
+    },
     "friend": {
         "violet-core": {
             "customjs": {
