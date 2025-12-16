@@ -30,7 +30,7 @@ dv.view("System/script/Dataview/widget/Clock", {
 /**
  * Vault links
  */
-dv.el("div", "[[Plugins]] - [[Templates]] | [[Vault]] - [[Project]] - [[Area]] - [[Convo]]");
+dv.el("div", "[[Plugins]] - [[Templates]] | [[Vault]] - [[Projects]] - [[Areas]] - [[Convo]]");
 
 /**
  * Tasks
