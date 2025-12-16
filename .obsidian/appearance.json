@@ -1,1 +1,9 @@
-{}
+{
+  "showViewHeader": false,
+  "showRibbon": false,
+  "enabledCssSnippets": [
+    "[vault] evergarden",
+    "[patch plugin] datacore",
+    "[patch obsidian] link"
+  ]
+}
