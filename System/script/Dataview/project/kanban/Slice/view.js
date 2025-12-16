@@ -17,7 +17,7 @@ let lanes = Projects.getProjects("active")
 })
 .filter(kanban => kanban)  // Remove undefined kanban
 .map(kanban => kanban.getLaneByName("In Progress"))
-.filter(lane => lane.length);  // Remove empty lanes
+.filter(lane => lane?.length);  // Remove empty lanes
 
 containerEl.addClass("kanban-slice")
 
