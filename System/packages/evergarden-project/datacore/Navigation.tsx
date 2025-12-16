@@ -92,8 +92,8 @@ function Tab({ name, icon, link, count, onClick, selected }) {
 }
 
 function useProject() {
-    const project = Projects.getProjectByPath(dc.currentPath());
-    dc.useFile(project.file.path);
+    const project = Projects.getProjectByPath(dc.useCurrentPath());
+    dc.useFile(project?.file.path);
     return project;
 }
 
@@ -101,12 +101,12 @@ function IssueTrackerTab({ project }) {
     const issueTracker = project?.issueTracker;
 
     const openIssueCount = dc.useQuery(
-        `@page and path("${project.path}") and $row["issue/status"] = "open"`
+        `@page and path("${project?.path}") and $row["issue/status"] = "open"`
     ).length;
     const createIssueTracker = dc.useCallback(() => {
         new createNoteModal(
-            `Create issue tracker for project ${project.name}?`,
-            async () => await project.createIssueTracker()
+            `Create issue tracker for project ${project?.name}?`,
+            async () => await project?.createIssueTracker()
         ).open();
     }, []);
 
@@ -132,8 +132,8 @@ function KanbanTab({ project }) {
     }, [kanbanRevision]);
     const createKanban = dc.useCallback(() => {
         new createNoteModal(
-            `Create kanban for project ${project.name}?`,
-            async () => await project.createKanban()
+            `Create kanban for project ${project?.name}?`,
+            async () => await project?.createKanban()
         ).open()
     }, []);
 
@@ -157,9 +157,9 @@ function ProjectNavigation() {
             <ul className="tabs-container">
                 {[
                     <Tab
-                        name={project.name}
+                        name={project?.name}
                         icon="home"
-                        link={dc.fileLink(project.file.path)}
+                        link={dc.fileLink(project?.file.path)}
                         selected={dc.currentPath() === project?.file?.path}
                     />,
                     <IssueTrackerTab project={project} />,
