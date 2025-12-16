@@ -1,1 +1,7 @@
-[]
+[
+  "customjs",
+  "datacore",
+  "dataview",
+  "templater-obsidian",
+  "obsidian-kanban"
+]

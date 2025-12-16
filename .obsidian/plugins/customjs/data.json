@@ -1,0 +1,7 @@
+{
+  "jsFiles": "System/packages/violet-core/customjs/_Violet.js",
+  "jsFolder": "System/script/CustomJS",
+  "startupScriptNames": [],
+  "registeredInvocableScriptNames": [],
+  "rerunStartupScriptsOnFileChange": false
+}
