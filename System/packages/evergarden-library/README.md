@@ -61,7 +61,7 @@ There are many nuances in identifying books as different editions of the same wo
 
 ### Display associated literature notes
 
-This feature works together with [[System/packages/evergarden-zettel/README#Literature note|literature notes]]. It display literature notes that [[System/packages/evergarden-zettel/README#Linking literature note to sources|links]] the book from their `literature/reference` property.
+This feature works together with [[System/packages/evergarden-zettel/README#Literature note|literature notes]]. It display literature notes that [[System/packages/evergarden-zettel/README#Referencing sources|links]] the book from their `literature/reference` property.
 
 ![[Literature notes screenshot.png]]
 
