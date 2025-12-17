@@ -1,5 +1,8 @@
 ---
 created: 2025-12-16T11:00:11.830+08:00
+aliases:
+  - Workspace
+  - evergarden-workspace
 ---
 # Workspace
 
