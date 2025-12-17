@@ -3,7 +3,7 @@ created: 2025-12-17T11:44:42.646+08:00
 ---
 # Evergarden
 
-About [[System/README|Evergarden]]
+About [[System/README|Evergarden]] and [[Project Violet]]
 
 ## Quick navigation
 
