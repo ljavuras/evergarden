@@ -32,11 +32,11 @@ titleEl.createSpan({
     cls: "kanban-slice__title-option",
     text: "active projects"
 });
- 
+
 let statusEl = containerEl.createDiv("kanban-slice__status");
-statusEl.createEl("strong", { text: lanes.reduce((acc, lane) => acc + lane.length, 0) });
+statusEl.createEl("strong", { text: lanes.reduce((acc, lane) => acc + lane.length, 0) || "0" });
 statusEl.appendText(" items accross ");
-statusEl.createEl("strong", { text: lanes.length });
+statusEl.createEl("strong", { text: lanes.length || "0" });
 statusEl.appendText(" projects");
 
 // Render lanes
