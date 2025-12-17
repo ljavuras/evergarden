@@ -22,6 +22,19 @@ created: 2025-12-16T21:33:17.698+08:00
 | Show tab title bar | false | Full path is irrelevant in most cases. Prefer `Rename file` command (`F2`) over clicking on title bar.                                          |
 | Show ribbon        | false | Prefer keyboard over mouse, and reduces visual clutter.                                                                                         |
 
+### Hotkeys
+
+| Command                                             | Key        | Description         |
+| --------------------------------------------------- | ---------- | ------------------- |
+| [Package] Periodic: Navigate backwards              | Ctrl+Alt+← |                     |
+| [Package] Periodic: Navigate forward                | Ctrl+Alt+→ |                     |
+| Navigate back                                       | Alt+←      | Align with browser  |
+| Navigate forward                                    | Alt+→      | Align with browser  |
+| [Package] Templater: Create new note from template  | Alt+N      | Replace *Templater* |
+| [Package] Templater: Insert template to active note | Alt+E      | Replace *Templater* |
+| Templater: Create new note from template            | blank      |                     |
+| [Package]Templater: Insert template to active note  | blank      |                     |
+
 ## Core plugins
 
 ### Backlinks
