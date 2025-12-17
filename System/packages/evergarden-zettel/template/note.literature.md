@@ -36,22 +36,22 @@ if ("literature/reference" in active_frontmatter) {
     referenceLink = active_frontmatter['literature/reference'];
 } else if (active_frontmatter?.tags?.find((tag) => tag.startsWith("a/source"))) {
     // Set reference to active file if it is #a/source
-    referenceLink = new Obsidian.Link(
+    referenceLink = [new Obsidian.Link(
         tp.config.active_file,
         tp.config.target_file
     )
-    .toString();
+    .toString()]
 }
 // TODO: Prompt for referenceLink
 
 // TODO: If the modal is canceled, delete note
-referenceLocator = await (
+referenceLocator = [await (
     new Obsidian.InputPromptModal(
         "submit locator",
         "Reference locator",
     )
 )
-.getInput();
+.getInput()]
 
 tp.setFrontMatter({
     'literature/reference': referenceLink,
