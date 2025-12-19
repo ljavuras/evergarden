@@ -15,22 +15,22 @@ In [[System/README|Evergarden]], tags are used to label **properties** of a note
 
 These are some of the tags used in [[System/README|Evergarden]].
 
-| Tag                | Description                                                                                                    |
-| ------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `note/*`           | Used by various automation for filtering their responsible notes.                                              |
-| `note/periodic/*`  | Periodic notes managed by `evergarden-periodic`.                                                               |
-| `note/issue`       | An issue note, fetched by issue tracker.                                                                       |
-| `note/area`        | An area note, used by `evergarden-area`.                                                                       |
-| `note/tag`         | A note documenting tags; tag pages are provided by *Tag Wrangler*.                                             |
-| `is/personal`      | The note is personal and not meant to be seen by others                                                        |
-| `is/dynamic`       | The displayed content largely depends on other notes, e.g., dashboards. Not intended to be viewed in Markdown. |
-| `zettel/*`         | Zettelkasten notes.                                                                                            |
-| `a/*`              | Nouns.                                                                                                         |
-| `a/source/*`       | The note represents an information source.                                                                     |
-| `a/source/book`    | The note is about a book.                                                                                      |
-| `a/source/website` | The note contains metadata of a website, or is a clipping of a webpage                                         |
-| `a/project`        | A project, used by `evergarden-project`.                                                                       |
-| `depr/*`           | Deprecated tags.                                                                                               |
+| Tag                | Description                                                                                                                                                                         |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `note/*`           | Used by various automation for filtering their responsible notes.                                                                                                                   |
+| `note/periodic/*`  | Periodic notes managed by `evergarden-periodic`.                                                                                                                                    |
+| `note/issue`       | An issue note, fetched by issue tracker.                                                                                                                                            |
+| `note/area`        | An area note, used by `evergarden-area`.                                                                                                                                            |
+| `note/tag`         | A note documenting tags; tag pages are provided by *Tag Wrangler*.                                                                                                                  |
+| `is/personal`      | The note is personal and not meant to be seen by others                                                                                                                             |
+| `is/dynamic`       | The displayed content largely depends on other notes, e.g., dashboards. Automatically toggles reading mode by [[System/packages/evergarden-auto-view-mode/README\|Auto View Mode]]. |
+| `zettel/*`         | Zettelkasten notes.                                                                                                                                                                 |
+| `a/*`              | Nouns.                                                                                                                                                                              |
+| `a/source/*`       | The note represents an information source.                                                                                                                                          |
+| `a/source/book`    | The note is about a book.                                                                                                                                                           |
+| `a/source/website` | The note contains metadata of a website, or is a clipping of a webpage                                                                                                              |
+| `a/project`        | A project, used by `evergarden-project`.                                                                                                                                            |
+| `depr/*`           | Deprecated tags.                                                                                                                                                                    |
 
 ## Where to place tags?
 
