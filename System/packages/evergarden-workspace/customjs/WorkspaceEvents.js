@@ -9,7 +9,7 @@ class WorkspaceEvents extends customJS.Violet.Package {
         // Find differences for each layout-change event, emit leaf-created
         // and leaf-detached event
         let leaves = new Set();
-        const onLayoutReady = () => {
+        this.app.workspace.onLayoutReady(() => {
             this.app.workspace.iterateAllLeaves((leaf) => {leaves.add(leaf)});
             let event_ref = this.app.workspace.on('layout-change', () => {
                 let leaves_next = new Set();
@@ -29,12 +29,6 @@ class WorkspaceEvents extends customJS.Violet.Package {
                 leaves = leaves_next;
             });
             this.registerEvent(event_ref);
-        }
-
-        if (this.app.workspace.layoutReady) {
-            onLayoutReady();
-        } else {
-            this.app.workspace.onLayoutReady(onLayoutReady);
-        }
+        });
     }
 }

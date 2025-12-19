@@ -53,25 +53,23 @@ class ProgressUpdateService extends customJS.Violet.Package {
     
     // Register page-change event handlers when a new leaf is created 
     onload() {
-        const onLayoutReady = () => {
+        this.app.workspace.onLayoutReady(() => {
             this.app.workspace.iterateAllLeaves((leaf) => {
                 this.registerPDFPageChangeEvent(leaf);
             });
+
             this.registerEvent(
                 this.app.workspace.on('leaf-created', (leaf) => {
                     this.registerPDFPageChangeEvent(leaf);
                 })
             );
+
             this.registerEvent(
                 this.app.workspace.on('leaf-detached', (leaf) => {
                     this.unregisterPDFPageChangeEvent(leaf);
                 })
             );
-        };
-        
-        this.app.workspace.layoutReady
-            ? onLayoutReady()
-            : this.app.workspace.onLayoutReady(onLayoutReady);
+        });
     }
 
     // Unregister all existing page-change event handlers
