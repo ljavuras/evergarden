@@ -3,5 +3,6 @@
   "datacore",
   "dataview",
   "templater-obsidian",
-  "obsidian-kanban"
+  "obsidian-kanban",
+  "fix-require-modules"
 ]

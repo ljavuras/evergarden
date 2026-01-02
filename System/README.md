@@ -30,6 +30,7 @@ Automation and UI are built only on well-supported, popular plugins, notably:
 - [Dataview](obsidian://show-plugin?id=dataview)/[Datacore](obsidian://show-plugin?id=datacore)
 - [Templater](obsidian://show-plugin?id=templater-obsidian)
 - [CustomJS](obsidian://show-plugin?id=customjs)
+- [CodeScript Toolkit](obsidian://show-plugin?id=fix-require-modules)
 
 Other plugins I use are non-intrusive and do not affect actual text.
 

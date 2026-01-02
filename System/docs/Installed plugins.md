@@ -48,6 +48,12 @@ Autocomplete might not list this path as an available option, because it's not u
 | Default date/time format | YYYY/MM/dd HH:mm ZZ | Similar to ISO 8601                                   |
 | Inline fields            | false               | Avoid [[System/README#Markdown first\|custom syntax]] |
 
+### CodeScript Toolkit
+
+| Setting             | Value                                 | Description                                                                 |
+| ------------------- | ------------------------------------- | --------------------------------------------------------------------------- |
+| Script modules root | System/script/CodeScriptToolkit/.root | Put scripts under `.root/` prevents *Obsidian* from indexing `node_modules` |
+
 ## Helper plugins
 
 Plugins that have an effect on workflow, but do not have an impact on the actual content of the files. The vault will still work if the plugin is disabled, but with some inconvenience.
