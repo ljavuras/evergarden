@@ -454,11 +454,14 @@ class AutoEmbed extends customJS.Violet.Package {
         if (!customJS.AutoEmbed) return;
         const ORDER = customJS.AutoEmbed.ORDER;
 
+        const view = this.owner.view  // MarkdownPreviewView
+            ?? this.owner.owner;      // MarkdownEmbedView
+
         // No embeds are visible within preview viewport
         if (!customJS.AutoEmbed._embeds.some(embedSpec => (
             embedSpec.order >= ORDER.PROPERTIES
             && embedSpec.order < ORDER.BACKLINKS
-            && embedSpec.shouldEmbed(this.owner.view)
+            && embedSpec.shouldEmbed(view)
         ))) {
             return;
         }
@@ -518,12 +521,8 @@ class AutoEmbed extends customJS.Violet.Package {
             if (embedSpec.order < ORDER.PROPERTIES) return;
             if (embedSpec.order >= ORDER.BACKLINKS) return;
 
-            // MarkdownPreviewRenderer is rendering an embedded note
-            // @TODO: support embedded notes
-            if (!this.owner.view) return;
-
             // Shouldn't embed
-            if (!embedSpec.shouldEmbed(this.owner.view)) return;
+            if (!embedSpec.shouldEmbed(view)) return;
 
             // Embedded element
             let el = this.embedRecycler.get(embedSpec);
@@ -535,7 +534,7 @@ class AutoEmbed extends customJS.Violet.Package {
                         "data-embed-order": embedSpec.order,
                     },
                 });
-                embedSpec.renderEmbed(el, this.owner.view);
+                embedSpec.renderEmbed(el, view);
                 this.embedRecycler.push(embedSpec, el);
             }
 

@@ -11,7 +11,7 @@ Automatically embed UI elements into your notes without altering the Markdown so
 Automatic embeds will show in **Preview mode** and **Live Preview mode**. Switching to **Source mode** reveals the original document without embeds (top bar and bottom bar embeds that are outside the viewport will still remain).
 
 ![[Auto Embed example document.png]]
-[[Example]] in shown Preview mode, Live Preview mode, and Source mode, the embeds are defined in `AutoEmbedExample.js`.
+[[Example]] in Preview mode, Live Preview mode, and Source mode, the embeds are defined in `AutoEmbedExample.js`.
 
 ## Creating embeds
 
@@ -96,6 +96,9 @@ Embeds with larger `order` appear after those with smaller `order`. The document
 |   [30, Infinity) | Bottom bar                            |
 
 If `embedSpec.order` is `0`, Auto Embed cannot automatically determine placement. In this case, you must provide both [[#locatePreviewAnchor]] and [[#locateSourcePosition]].
+
+> [!NOTE]
+> Auto embeds outside the range [-10, 20), i.e., before properties and after backlinks, will not appear in hover preview and embedded notes.
 
 #### shouldEmbed
 
@@ -260,7 +263,6 @@ app.workspace.getActiveFileView().leaf.view.previewMode.renderer
 - Inline embeds are not supported.
 - An `embedSpec` can only create one embed and cannot create embeds dynamically, for example, inserting a decoration after every header.
 - Creating embeds with excessive height messes with the preview renderer, causing janky behavior or even prevent scrolling.
-- Embedded notes and hover previews aren't supported (yet).
 
 # Alternatives
 
