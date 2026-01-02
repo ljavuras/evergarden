@@ -16,6 +16,9 @@ class Violet extends obsidian.Component {
         customjs: { files: [], mapping: {} }
     };
 
+    /** Functions that execute when a package is ready */
+    _onReady = {};
+
     constructor() {
         super();
         this.initViolet();
@@ -213,6 +216,20 @@ class Violet extends obsidian.Component {
         return configContent;
     }
 
+    registerOnReady(packageId, className, callback) {
+        this._onReady[`${packageId}:${className}`] ??= [];
+        this._onReady[`${packageId}:${className}`].push(callback);
+        if (this.packages[packageId]?.customjs?.[className]?._loaded) {
+            callback();
+        }
+    }
+
+    unregisterOnReady(packageId, className, callback) {
+        const callbacks = this._onReady[`${packageId}:${className}`];
+        const index = callbacks?.indexOf(callback);
+        if (index > -1) { callbacks.splice(index, 1); }
+    }
+
     deconstructor() {
         this.unload();
     }
@@ -227,6 +244,20 @@ class Violet extends obsidian.Component {
 
         get path() {
             return this.Violet.packages[this.packageId].path;
+        }
+
+        /** Override load to call queued onReady callbacks */
+        async load() {
+            await super.load();
+            const asyncFns = [];
+            this.Violet._onReady[`${this.packageId}:${this.constructor.name}`]
+            ?.forEach((callback) => {
+                const promise = callback();
+                if (promise) { asyncFns.push(promise); }
+            });
+            if (asyncFns.length > 0) {
+                await Promise.all(asyncFns);
+            }
         }
 
         getPackage(id) {
@@ -264,6 +295,13 @@ class Violet extends obsidian.Component {
             );
         }
 
+        onPackageReady(packageId, className, callback) {
+            this.Violet.registerOnReady(packageId, className, callback);
+            this.register(() => {
+                this.Violet.unregisterOnReady(packageId, className, callback);
+            });
+        }
+
         /**
          * Add command, see {@link https://docs.obsidian.md/Plugins/User+interface/Commands}
          * 
@@ -284,16 +322,120 @@ class Violet extends obsidian.Component {
             command.id = `violet:${pkg.id}:${command.id}`;
             command.name = `[Package] ${pkg.name}: ${command.name}`;
             customJS.app.commands.addCommand(command);
-            this.register((() => 
+            this.register(() => 
                 customJS.app.commands.removeCommand(command.id)
-            ));
+            );
             return command;
         }
 
         removeCommand(commandId) {
             customJS.app.commands.removeCommand(
-                `violet:${pkg.id}:${commandId}`
+                `violet:${this.packageId}:${commandId}`
             );
+        }
+
+        /**
+         * Register an embed to be rendered.
+         * @param {object} embedSpec - Positions and renders the embed
+         * @param {string} embedSpec.id
+         * @param {number} embedSpec.order
+         * @param {(view: MarkdownView) => boolean} embedSpec.shouldEmbed
+         * @param {(containerEl: HTMLElement, view: MarkdownView) => null} embedSpec.renderEmbed
+         * @param {(renderer: MarkdownPreviewRenderer) => {anchorEl: HTMLElement, order: number}} [embedSpec.locatePreviewAnchor]
+         * @param {(tree: import('@lezer/common').Tree, editorState: import('@codemirror/state').EditorState) => {pos: number, side: number}} [embedSpec.locateSourcePosition]
+         */
+        registerEmbed(embedSpec) {
+            embedSpec.id = `${this.packageId}:${embedSpec.id}`;
+            this.onPackageReady("evergarden-auto-embed", "AutoEmbed", () => {
+                customJS.AutoEmbed.registerEmbed(embedSpec);
+            });
+            this.register(() => customJS.AutoEmbed?.unregisterEmbed(embedSpec.id));
+        }
+
+        unregisterEmbed(embedId) {
+            customJS.AutoEmbed?.unregisterEmbed(`${this.packageId}:${embedId}`);
+        }
+
+        /**
+         * Handles code block post-processing, see {@link https://docs.obsidian.md/Reference/TypeScript+API/Plugin/registerMarkdownCodeBlockProcessor}
+         * For `MarkdownPostProcessorContext`, see {@link https://docs.obsidian.md/Reference/TypeScript+API/MarkdownPostProcessorContext}
+         * @callback Violet~codeBlockProcessor
+         * @param {string} source
+         * @param {HTMLElement} element
+         * @param {MarkdownPostProcessorContext} context
+         */
+
+        /**
+         * Post-process code blocks, see {@link https://docs.obsidian.md/Plugins/Editor/Markdown+post+processing#Post-process+Markdown+code+blocks}
+         * Will automatically unregister upon unload. If you want to unregister
+         * beforehand, save the returned `postProcessor` and pass it into
+         * `unregisterMarkdownCodeBlockProcessor`.
+         * @param {string} langauge
+         * @param {Violet~codeBlockProcessor} handler
+         * @param {number} [sortOrder] 
+         * @returns {MarkdownPostProcessor} - See {@link https://docs.obsidian.md/Reference/TypeScript+API/MarkdownPostProcessor}
+         */
+        registerMarkdownCodeBlockProcessor(langauge, handler, sortOrder) {
+            const MarkdownPreviewRenderer = obsidian.MarkdownPreviewRenderer;
+            const postProcessor = MarkdownPreviewRenderer.createCodeBlockPostProcessor(langauge, handler);
+            MarkdownPreviewRenderer.registerPostProcessor(postProcessor, sortOrder);
+            MarkdownPreviewRenderer.registerCodeBlockPostProcessor(langauge, handler);
+            this.app.workspace.trigger("post-processor-change");
+            this.register(() => {
+                this.unregisterMarkdownCodeBlockProcessor(langauge, postProcessor);
+            });
+            return postProcessor;
+        }
+
+        unregisterMarkdownCodeBlockProcessor(langauge, postProcessor) {
+            const MarkdownPreviewRenderer = obsidian.MarkdownPreviewRenderer;
+            MarkdownPreviewRenderer.unregisterPostProcessor(postProcessor);
+            MarkdownPreviewRenderer.unregisterCodeBlockPostProcessor(langauge);
+            this.app.workspace.trigger("post-processor-change");
+        }
+
+        /**
+         * Post-processes rendered markdown.
+         * For `MarkdownPostProcessorContext`, see {@link https://docs.obsidian.md/Reference/TypeScript+API/MarkdownPostProcessorContext}
+         * @callback Violet~markdownProcessor
+         * @param {HTMLElement} element
+         * @param {MarkdownPostProcessorContext} context
+         */
+
+        /**
+         * Post-process rendered markdown, see {@link https://docs.obsidian.md/Plugins/Editor/Markdown+post+processing}
+         * Will automatically unregister upon unload.
+         * @param {Violet~markdownProcessor} postProcessor 
+         * @param {number} sortOrder 
+         * @returns {MarkdownPostProcessor}
+         */
+        registerMarkdownPostProcessor(postProcessor, sortOrder) {
+            const MarkdownPreviewRenderer = obsidian.MarkdownPreviewRenderer;
+            MarkdownPreviewRenderer.registerPostProcessor(postProcessor, sortOrder);
+            this.app.workspace.trigger("post-processor-change");
+            this.register(() => {
+                this.unregisterMarkdownPostProcessor(postProcessor)
+            });
+            return postProcessor;
+        }
+        
+        unregisterMarkdownPostProcessor(postProcessor) {
+            const MarkdownPreviewRenderer = obsidian.MarkdownPreviewRenderer;
+            MarkdownPreviewRenderer.unregisterPostProcessor(postProcessor);
+            this.app.workspace.trigger("post-processor-change");
+        }
+
+        /**
+         * Register a CodeMirror 6 extension, see:
+         * - {@link https://docs.obsidian.md/Plugins/Editor/Editor+extensions}
+         * - {@link https://docs.obsidian.md/Reference/TypeScript+API/Plugin/registerEditorExtension}
+         * @param {extension} extension - CodeMirror 6 extension, see {@link https://codemirror.net/docs/ref/#state.Extension}
+         */
+        registerEditorExtension(extension) {
+            this.app.workspace.registerEditorExtension(extension);
+            this.register(() => {
+                this.app.workspace.unregisterEditorExtension(extension);
+            })
         }
     }
 }
