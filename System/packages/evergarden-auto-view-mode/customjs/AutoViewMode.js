@@ -28,7 +28,7 @@ class AutoViewMode extends customJS.Violet.Package {
 
         if (state.state.mode === "source"
         && Obsidian.file.getTags(Obsidian.vault.getFile(state.state.file))
-        .some((tag) => {
+        ?.some((tag) => {
             return tag === "#is/dynamic"
                 || tag.startsWith("#is/dynamic/");
         })) {
