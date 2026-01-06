@@ -102,9 +102,9 @@ class Datacore extends customJS.Violet.Package {
     async getScriptPath(packageId, scriptName) {
         await this.isReady();
         if (!(packageId in this.config.components)) {
-            console.error(`Package ${packageId} doesn't exist.`);
+            throw new Error(`Package ${packageId} doesn't exist.`);
         } else if (!this.config.components[packageId][scriptName]) {
-            console.error(`Datacore component ${scriptName} doesn't exist in package ${packageId}.`)
+            throw new Error(`Datacore component ${scriptName} doesn't exist in package ${packageId}.`)
         }
         return this.config.components[packageId]?.[scriptName];
     }
@@ -128,6 +128,11 @@ class Datacore extends customJS.Violet.Package {
         vault = customJS.app.vault;
         violetDatacore = customJS.Datacore;
 
+        config = {
+            // Dev mode, auto-refresh `require`d component if enabled
+            dev: false
+        };
+
         constructor(dc) {
             // dc is already wrapped, skip wrapping
             if (dc instanceof this.constructor) {
@@ -143,21 +148,22 @@ class Datacore extends customJS.Violet.Package {
         }
 
         /**
-         * Loads a script. There are 3 ways to load a script:
-         * 1. Path: Loads a script by path
-         * 2. Link: Loads a script from markdown file
-         * 3. Package: Loads a script by package and script name
+         * Loads a Datacore script with package resolution.
+         * 
+         * Supported script sources:
+         * 1. Path - Loads a script by path.
+         * 2. Link - Loads a script from markdown file.
+         * 3. Package - Loads a script by package name and script name.
          * 
          * Every dc of the script loaded by this function will be pre-wrapped
          * with VioletDatacoreLocalApi.
          * 
          * @param {string|Link} pathOrPackage - File path, Datacore Link to a
-         * section where the codeblock is located, or package name.
-         * @param {string} scriptName - Name of the loaded script. Loads a
-         * script by package when specified.
+         * section containing the code block, or package name.
+         * @param {string} scriptName - Script name when loading from package
          * @returns {any}
          */
-        async require(pathOrPackage, scriptName) {
+        async load(pathOrPackage, scriptName) {
             const path = scriptName
                 ? await this.violetDatacore.getScriptPath(pathOrPackage, scriptName)
                 : pathOrPackage;
@@ -168,90 +174,75 @@ class Datacore extends customJS.Violet.Package {
             this.scriptCache.scripts.clear();
 
             // https://github.com/blacksmithgu/datacore/blob/966f22896ec3cbb4f2160a049c2b2d072d276880/src/api/local-api.tsx#L92-L95
-            const result = await this.scriptCache.load(path, { dc: this });
-            let scriptObject = result.orElseThrow();
-
-            const stylePath = path.replace(/\.[jt]sx?$/, ".css");
-            const styleFile = this.vault.getFileByPath(stylePath);
-
-            if (styleFile) {
-                const styleContent = await this.vault.cachedRead(styleFile);
-                const { h, Fragment } = this.preact;
-
-                function addStyle(Component) {
-                    if (typeof Component === "function") {
-                        return ({[Component.name]: ({ children, ...props }) =>
-                            h(Fragment, { children: [
-                                h("style", { scope: " ", children: styleContent }),
-                                h(Component, props, ...(children ?? []))
-                            ]})
-                        })[Component.name];
-                    } else {
-                        let component = {}
-                        for (const [key, value] of Object.entries(Component)) {
-                            component[key] = addStyle(value);
-                        }
-                        return component;
-                    }
-                }
-
-                scriptObject = addStyle(scriptObject);
-            }
-
-            return scriptObject;
+            return (
+                await this.scriptCache.load(path, { dc: this })
+            ).orElseThrow();
         }
 
         /**
-         * Use the result returned by a script from the given path or link.
-         * Automatically updates the returned result when the source updates.
+         * Loads a script with package support and additional features:
          * 
-         * @example
-         * return function() {
-         *     const { MyComponent } = dc.useScript("path/to/component.tsx");
-         *     return <MyComponent />
-         * }
+         * - Automatic style injection - Stylesheets in the same directory
+         *   whose names match the script name or exported component names
+         *   are automatically included.
+         * - Error boundary - Displays errored component name, script path, and
+         *   logs the error to console.
+         * - Dev mode auto-refresh - When `dc.config.dev` is `true`, exported
+         *   component will automatically refresh when their associated script
+         *   file and stylesheets have been modified.
+         * 
+         * Supported script sources:
+         * 1. Path - Loads a script by path.
+         * 2. Link - Loads a script from markdown file.
+         * 3. Package - Loads a script by package name and script name.
+         * 
+         * Every dc of the script loaded by this function will be pre-wrapped
+         * with VioletDatacoreLocalApi.
          * 
          * @param {string|Link} pathOrPackage - File path, Datacore Link to a
-         * section where the codeblock is located, or package name.
-         * @param {string} scriptName - Name of the loaded script. Loads a
-         * script by package when specified.
+         * section containing the code block, or package name.
+         * @param {string} scriptName - Script name when loading from package
          * @returns {any}
          */
-        useScript(pathOrPackage, scriptName) {
-            const [path, setPath] = this.useState();
-            scriptName
-                ? this.violetDatacore.getScriptPath(pathOrPackage, scriptName)
-                    .then(path => setPath(path))
-                : setPath(pathOrPackage);
-            if (!path) return;
-            const filePath = this.scriptCache.pathkey(path);
-            const [script, setScript] = this.useState();
-            const scriptRevision = this.useFile(filePath)?.$revision;
-            const styleRevision = this.useFile(
-                filePath.replace(/\.[jt]sx?$/, ".css")
-            )?.$revision;
-            const [error, setError] = this.useState();
+        async require(pathOrPackage, scriptName) {
+            const scriptPath = scriptName
+                ? await this.violetDatacore.getScriptPath(pathOrPackage, scriptName)
+                // Convert Link to string
+                // https://github.com/blacksmithgu/datacore/blob/31a8b18b0978f8b06d03d6dabcf023a7362b56f2/src/api/script-cache.ts#L127
+                : (pathOrPackage.obsidianLink? pathOrPackage.obsidianLink() : pathOrPackage);
 
-            this.useEffect(() => {
-                // Datacore doesn't anticipate script to change, delete cached
-                // script object to force reload
-                const key = this.scriptCache.pathkey(path);
-                this.scriptCache.scripts.delete(key);
+            const scriptObject = await this.load(scriptPath);
+            const { 
+                ComponentWrapper,
+                AutoRefreshComponentWrapper
+            } = await this.load("violet-datacore", "ComponentWrapper");
 
-                this.require(path)
-                    .then(component => setScript(() => component))
-                    .finally(() => error && setError())
-                    .catch(e => setError(e));
+            // Use `AutoRefreshComponentWrapper` if `dc` is in dev mode
+            const Wrapper = this.config?.dev
+                ? AutoRefreshComponentWrapper
+                : ComponentWrapper;
 
-                new obsidian.Notice("Script reloaded");
-            }, [path, scriptRevision, styleRevision]);
+            const { h } = this.preact;
 
-            if (error) {
-                console.error(error);
-                return;
+            function wrapComponent(Component) {
+                if (typeof Component === "function") {
+                    return ({[Component.name]: ({ ...props }) =>
+                        h(Wrapper, {
+                            component: Component,
+                            scriptPath: scriptPath,
+                            ...props
+                        })
+                    })[Component.name];  // Return a named function
+                } else {
+                    let scriptObject = {}
+                    for (const [key, value] of Object.entries(Component)) {
+                        scriptObject[key] = wrapComponent(value);
+                    }
+                    return scriptObject;
+                }
             }
 
-            return script;
+            return wrapComponent(scriptObject);
         }
 
         /**
