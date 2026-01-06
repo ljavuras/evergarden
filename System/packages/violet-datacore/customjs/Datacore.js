@@ -171,7 +171,7 @@ class Datacore extends customJS.Violet.Package {
             // scriptCache doesn't update instantly and lags behind for unknown
             // reason. Clear cache to force reload.
             // TODO: proper fix
-            this.scriptCache.scripts.clear();
+            this.scriptCache.scripts.delete(path);
 
             // https://github.com/blacksmithgu/datacore/blob/966f22896ec3cbb4f2160a049c2b2d072d276880/src/api/local-api.tsx#L92-L95
             return (

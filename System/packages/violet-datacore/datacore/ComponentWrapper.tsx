@@ -96,6 +96,10 @@ function AutoRefreshComponentWrapper({ component, scriptPath, children, ...props
     const [scriptStyle, setScriptStyle] = useState();
     const [componentStyle, setComponentStyle] = useState();
 
+    // Check if these stylesheets exist
+    let scriptStyleFile = true;
+    let componentStyleFile = true;
+
     const [error, setError] = useState();
 
     // Reload Component on script update
@@ -139,19 +143,21 @@ function AutoRefreshComponentWrapper({ component, scriptPath, children, ...props
 
     // Reload script style
     useEffect(async () => {
+        scriptStyleFile = false;
         if (!scriptStylePath) return;
-        const file = app.vault.getFileByPath(scriptStylePath)
-        if (!file) return;
-        const style = await app.vault.cachedRead(file);
+        scriptStyleFile = app.vault.getFileByPath(scriptStylePath)
+        if (!scriptStyleFile) return;
+        const style = await app.vault.cachedRead(scriptStyleFile);
         setScriptStyle(style);
     }, [scriptStyleRevision]);
 
     // Reload Component style
     useEffect(async () => {
+        componentStyleFile = false;
         if (!componentStylePath) return;
-        const file = app.vault.getFileByPath(componentStylePath);
-        if (!file) return;
-        const style = await app.vault.cachedRead(file);
+        componentStyleFile = app.vault.getFileByPath(componentStylePath);
+        if (!componentStyleFile) return;
+        const style = await app.vault.cachedRead(componentStyleFile);
         setComponentStyle(style);
     }, [componentStyleRevision]);
 
@@ -160,6 +166,10 @@ function AutoRefreshComponentWrapper({ component, scriptPath, children, ...props
             new Error(`scriptPath is not provided to ${AutoRefreshComponentWrapper.name}`)
         );
     }
+
+    // Wait until styles are fully loaded
+    const delayDisplay = (scriptStyleFile && !(typeof scriptStyle === "string"))
+        || (componentStyleFile && !(typeof componentStyle === "string"));
 
     return !scriptPath
     ? (
@@ -186,7 +196,7 @@ function AutoRefreshComponentWrapper({ component, scriptPath, children, ...props
             >
                 {scriptStyle && <style>{scriptStyle}</style>}
                 {componentStyle && <style>{componentStyle}</style>}
-                <Component {...props}>{children}</Component>
+                {!delayDisplay && <Component {...props}>{children}</Component>}
             </LoggingErrorBoundary>
         </ErrorContext.Provider>
     )
