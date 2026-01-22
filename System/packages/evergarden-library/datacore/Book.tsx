@@ -9,34 +9,11 @@ const {
     useRef,
     useEffect
 } = dc;
-
-function InternalLink({ link, className, children, ...props }) {
-    return <a
-                aria-label={link.displayOrDefault()}
-                className={"internal-link " + className}
-                target="_blank"
-                rel="noopener"
-                data-tooltip-position="top"
-                data-href={link.obsidianLink()}
-                href={link.obsidianLink()}
-                {...props}
-            >
-                {children ?? link.displayOrDefault()}
-            </a>
-}
-
-function ExternalLink({ href, className, children, ...props }) {
-    return (
-        <a
-            rel="noopener nofollow"
-            className={`external-link ${className}`}
-            href={href}
-            target="_blank"
-        >
-            {children ?? href}
-        </a>
-    )
-}
+const {
+    InternalLink,
+    ExternalLink,
+    Pill,
+} = await dc.require("evergarden-design-system", "Primitive");
 
 /**
  * Adds ", " between inline elements
@@ -341,12 +318,10 @@ function BookOverview() {
                         ?.filter((link) => link.fileName().startsWith("a-"))
                         ?.map((link) => {
                             return (
-                                <dc.Link
-                                    link={
-                                        link.withDisplay(
-                                            link.fileName().slice(2)
-                                        )
-                                    }
+                                <Pill
+                                    link={link.withDisplay(
+                                        link.fileName().slice(2)
+                                    )}
                                 />
                             )
                         })

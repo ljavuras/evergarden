@@ -11,18 +11,6 @@
 
 .evergarden.book-overview,
 .evergarden.book-series {
-    --evergarden-genre-background: var(--evergarden-tag-background);
-    --evergarden-genre-border: var(--evergarden-tag-border);
-    --evergarden-genre-border-radius: var(--evergarden-tag-border-radius);
-    --evergarden-genre-font-size: var(--evergarden-tag-font-size);
-    --evergarden-genre-color: var(--evergarden-tag-color);
-    --evergarden-genre-text-decoration: var(--evergarden-tag-text-decoration);
-    --evergarden-genre-padding: var(--evergarden-tag-padding);
-    --evergarden-genre-transition: var(--evergarden-tag-transition);
-    --evergarden-genre-background-hover: var(--evergarden-tag-background-hover);
-    --evergarden-genre-border-hover: var(--evergarden-tag-border-hover);
-    --evergarden-genre-color-hover: var(--evergarden-tag-color-hover);
-    --evergarden-genre-text-decoration-hover: var(--evergarden-tag-text-decoration-hover);
     --evergarden-ratings-color: var(--color-orange);
     --evergarden-ratings-background: var(--text-faint);
     --evergarden-progress-height: var(--progress-height, var(--size-4-2));
@@ -86,24 +74,6 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--size-4-1);
-}
-
-.evergarden.book-overview .genres > a.internal-link {
-    background-color: var(--evergarden-genre-background);
-    border: var(--evergarden-genre-border);
-    border-radius: var(--evergarden-genre-border-radius);
-    color: var(--evergarden-genre-color);
-    font-size: var(--evergarden-genre-font-size);
-    text-decoration: var(--evergarden-genre-text-decoration);
-    padding: var(--evergarden-genre-padding);
-    transition: var(--evergarden-genre-transition);
-}
-
-.evergarden.book-overview .genres > a.internal-link:hover {
-    background-color: var(--evergarden-genre-background-hover);
-    border: var(--evergarden-genre-border-hover);
-    color: var(--evergarden-genre-color-hover);
-    text-decoration: var(--evergarden-genre-text-decoration-hover);
 }
 
 .evergarden.book-overview .ratings {

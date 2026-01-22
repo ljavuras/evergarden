@@ -5,8 +5,9 @@
  * @author Ljavuras <ljavuras.py@gmail.com>
  */
 
-const { Area } = await cJS();
+const { Area } = VPS.require("evergarden-area");
 const { useMemo } = dc;
+const { Pill } = await dc.require("evergarden-design-system", "Primitive");
 
 return function AreaView() {
     const area = Area.getByPath(dc.useCurrentPath());
@@ -37,19 +38,19 @@ return function AreaView() {
                 <div className="relationship">Implies</div>
                 <div className="related-areas">
                     {
-                        area.superLinks.map(link => (
-                            <dc.Link
-                                link={link.withDisplay(link.fileName().slice(2))}
-                            />
-                        ))
+                        area.superLinks.map(link => {
+                            link = link.withDisplay(link.fileName().slice(2))
+                            return <Pill link={link} />
+                        })
                     }
                 </div>
                 <div className="relationship">Includes</div>
                 <div className="related-areas">
                     {
-                        subLinks.map(link => (
-                            <dc.Link link={link.withDisplay(link.fileName().slice(2))} />
-                        ))
+                        subLinks.map(link => {
+                            link = link.withDisplay(link.fileName().slice(2))
+                            return <Pill link={link} />
+                        })
                     }
                 </div>
             </div>

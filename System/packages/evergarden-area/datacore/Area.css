@@ -3,17 +3,17 @@
  */
 
 .evergarden.area {
-    --evergarden-area-background: var(--evergarden-tag-background);
-    --evergarden-area-border: var(--evergarden-tag-border);
-    --evergarden-area-border-radius: var(--evergarden-tag-border-radius);
-    --evergarden-area-font-size: var(--evergarden-tag-font-size);
-    --evergarden-area-color: var(--evergarden-tag-color);
-    --evergarden-area-text-decoration: var(--evergarden-tag-text-decoration);
-    --evergarden-area-padding: var(--evergarden-tag-padding);
-    --evergarden-area-transition: var(--evergarden-tag-transition);
-    --evergarden-area-background-hover: var(--evergarden-tag-background-hover);
-    --evergarden-area-border-hover: var(--evergarden-tag-border-hover);
-    --evergarden-area-color-hover: var(--evergarden-tag-color-hover);
+    --evergarden-area-background: var(--evergarden-pill-background);
+    --evergarden-area-border: var(--evergarden-pill-border);
+    --evergarden-area-border-radius: var(--evergarden-pill-border-radius);
+    --evergarden-area-font-size: var(--evergarden-pill-font-size);
+    --evergarden-area-color: var(--evergarden-pill-color);
+    --evergarden-area-text-decoration: var(--evergarden-pill-text-decoration);
+    --evergarden-area-padding: var(--evergarden-pill-padding);
+    --evergarden-area-transition: var(--evergarden-pill-transition);
+    --evergarden-area-background-hover: var(--evergarden-pill-background-hover);
+    --evergarden-area-border-hover: var(--evergarden-pill-border-hover);
+    --evergarden-area-color-hover: var(--evergarden-pill-color-hover);
 }
 
 .evergarden.area .details {
