@@ -6,7 +6,6 @@
  */
 
 const { Component, createContext } = dc.preact;
-const { useState } = dc;
 
 /**
  * Render a pretty centered error message in a box.
@@ -45,6 +44,25 @@ const ErrorContext = createContext({
 
 /**
  * Catches error and display errored component name and script path.
+ * It is an `ErrorContext` consumer, to use this component, put it inside
+ * `<ErrorContext.Provider />`, and supply `error` and `setError` to manage
+ * error state. This allows the parent component to reset error when error is
+ * resolved.
+ * 
+ * @example
+ * function View() {
+ *     const [error, setError] = useState(null);
+ *     return (
+ *         <ErrorContext.Provider value={{ error, setError }}>
+ *             <LoggingErrorBoundary
+ *                 componentName={Component.name}
+ *                 path={scriptPath}
+ *             >
+ *                 <Component />
+ *             </LoggingErrorBoundary>
+ *         </ErrorContext.Provider>
+ *     )
+ * }
  */
 class LoggingErrorBoundary extends Component {
     static contextType = ErrorContext;
@@ -61,19 +79,20 @@ class LoggingErrorBoundary extends Component {
     }
     
     render(props, state) {
+        const { componentName, path, children } = props;
         const { error } = this.context;
         return error
             ? <ErrorMessage
                 title={"Datacore script error"}
                 message={<>
-                    Failed to execute component <code>{props.componentName}</code> in:
+                    Failed to execute component <code>{componentName}</code> in:
                     <br />
-                    <code>{props.path}</code>
+                    <code>{path}</code>
                 </>}
                 error={error.stack}
                 reset={this.resetError}
             />
-            : props.children;
+            : children;
     }
 }
 
