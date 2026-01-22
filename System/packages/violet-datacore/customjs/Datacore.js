@@ -3,6 +3,8 @@ class Datacore extends customJS.Violet.Package {
     core = datacore.core;
     _ready = false;
 
+    SCRIPT_REGEX = /^(?:(?:[^\/\\]+)\/)*(?<scriptName>[^\/\\]+)\.[jt]sx?$/;
+
     constructor() {
         super();
 
@@ -28,27 +30,25 @@ class Datacore extends customJS.Violet.Package {
         // ADDITIONAL_EXTENSIONS.forEach((value) => FULL_EXTENSIONS.add(value));
 
         // Triggers index update for additional file extensions
-        this.registerEvent(
-            this.vault.on("create", (file) => {
-                if (!(file instanceof obsidian.TFile)) return;
-
+        // Update `config.scripts` on script update
+        const updateDatacoreIndex = (file) => {
+            if (!file.extension) return;
                 if (ADDITIONAL_EXTENSIONS.has(file.extension.toLowerCase())) {
                     this.core.trigger("update", this.core.revision);
                 }
-            })
-        );
+        }
 
+        for (const vaultEvent of ['create', 'delete', 'rename']) {
         this.registerEvent(
-            this.vault.on("modify", (file) => {
+                this.vault.on(vaultEvent, (file, oldPath) => {
                 if (!(file instanceof obsidian.TFile)) return;
-
-                if (ADDITIONAL_EXTENSIONS.has(file.extension.toLowerCase())) {
-                    this.core.trigger("update", this.core.revision);
-                }
+                    updateDatacoreIndex(file);
+                    this.updateConfig(vaultEvent, file, oldPath);
             })
         );
+        }
 
-        this.loadConfig();
+        this.buildConfig();
         this._ready = true;
     }
 
@@ -58,55 +58,93 @@ class Datacore extends customJS.Violet.Package {
         }
     }
 
-    loadConfig() {
-        this.loadSettings(true);
-        this.config = { files: [], folders: [], components: {} };
+    buildConfig() {
+        const settings = this.loadSettings();
+        this.config = { files: [], folders: [], scripts: {} };
 
-        // Parse friend settings from other packages
-        for (const [id, setting] of Object.entries(this.settings.all)) {
+        // Aggregate settings from all packages
+        for (const [id, setting] of Object.entries(settings.all)) {
             this.config.files = this.config.files.concat(
                 setting.files?.map(path => ({
-                    violet: id, 
+                    packageId: id,
                 path: this.getPackage(id).path + '/' + path
             })) ?? []
             );
 
             this.config.folders = this.config.folders.concat(
                 setting.folders?.map(path => ({
-                    violet: id,
+                    packageId: id,
                     path: this.getPackage(id).path + '/' + path
                 })) ?? []
             );
         }
 
-        // Find all components in their respective library
+        
+        // Find all components in each package
         this.config.files.forEach((fileItem) => {
-            const componentName = fileItem.path
-                .match(/([^\/\\]+)\.[jt]sx?$/)?.[1];
-            this.config.components[fileItem.violet] = {
-                [componentName]: fileItem.path
-            };
+            const scriptName = fileItem.path.match(this.SCRIPT_REGEX)
+                ?.groups.scriptName;
+            if (!scriptName) return;
+            this.config.scripts[fileItem.packageId] ??= {};
+            this.config.scripts[fileItem.packageId][scriptName] = fileItem.path;
         });
 
-        const componentExtRegex = /^[jt]sx?$/;
         this.config.folders.forEach((folderItem) => {
             customJS.Obsidian.vault.getFilesFromFolder(folderItem.path)
             .forEach((file) => {
-                if (!componentExtRegex.test(file.extension)) { return; }
-                this.config.components[folderItem.violet] ??= {};
-                this.config.components[folderItem.violet][file.basename] = file.path;
+                if (!this.SCRIPT_REGEX.test(file.path)) return;
+                this.config.scripts[folderItem.packageId] ??= {};
+                this.config.scripts[folderItem.packageId][file.basename] = file.path;
             });
         });
     }
 
+    updateConfig(vaultEvent, file, oldPath) {
+        const addFile = (file) => {
+            if (!this.SCRIPT_REGEX.test(file.path)) return;
+            const folderItem = this.config.folders
+            .filter(folderItem => file.path.startsWith(folderItem.path))
+            .reduce((maxFolderItem, folderItem) => {
+                return maxFolderItem.path.length > folderItem.path.length
+                    ? maxFolderItem
+                    : folderItem;
+            });
+
+            this.config.scripts[folderItem.packageId] ??= {};
+            this.config.scripts[folderItem.packageId][file.basename] = file.path;
+        }
+
+        const deletePath = (path) => {
+            const scriptName = path.match(this.SCRIPT_REGEX)?.groups.scriptName;
+            if (!scriptName) return;
+
+            const folderItem = this.config.folders
+            .filter(folderItem => path.startsWith(folderItem.path))
+            .reduce((maxFolderItem, folderItem) => {
+                return maxFolderItem.path.length > folderItem.path.length
+                    ? maxFolderItem
+                    : folderItem;
+            });
+
+            delete this.config.scripts[folderItem.packageId]?.[scriptName];
+        }
+
+        if (vaultEvent === 'create') addFile(file)
+        else if (vaultEvent === 'delete') deletePath(file.path)
+        else if (vaultEvent === 'rename') {
+            deletePath(oldPath);
+            addFile(file);
+        }
+    }
+
     async getScriptPath(packageId, scriptName) {
         await this.isReady();
-        if (!(packageId in this.config.components)) {
+        if (!(packageId in this.config.scripts)) {
             throw new Error(`Package ${packageId} doesn't exist.`);
-        } else if (!this.config.components[packageId][scriptName]) {
+        } else if (!this.config.scripts[packageId][scriptName]) {
             throw new Error(`Datacore component ${scriptName} doesn't exist in package ${packageId}.`)
         }
-        return this.config.components[packageId]?.[scriptName];
+        return this.config.scripts[packageId]?.[scriptName];
     }
 
     /**

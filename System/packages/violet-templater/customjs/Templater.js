@@ -19,15 +19,32 @@ class Templater extends customJS.Violet.Package {
         StartupTemplate      : 5,
     });
 
+    // https://github.com/SilentVoid13/Templater/blob/e2f8bf5f2bb3f01c02b468284cfc283789873fff/src/core/functions/FunctionsGenerator.ts#L8
+    FunctionsMode = Object.freeze({
+        INTERNAL     : 0,
+        USER_INTERNAL: 1,
+    });
+
+    config = {
+        files: [],
+        folders: [],
     // Templater plugin settings
-    pluginSettings = {
-        folder: app.plugins.plugins["templater-obsidian"]
-                .settings.templates_folder,
+        plugin: {
+            folder: this.plugin.settings.templates_folder,
+            // Backup up original settings
+            settings: {
+                trigger_on_file_creation: this.plugin.settings.trigger_on_file_creation,
+            }
+        }
     };
 
     onload() {
-        this.loadConfig();
+        this.settings = this.loadSettings();
+        this.buildConfig();
+        this.registerOnCreate();
         this.commands.forEach(cmd => this.addCommand(cmd));
+        this.getTemplates(true);
+        this._watchTemplateUpdate();
     }
 
     commands = [
@@ -53,49 +70,146 @@ class Templater extends customJS.Violet.Package {
         },
     ]
 
-    loadConfig() {
-        this.loadSettings();
+    buildConfig() {
+        const settings = this.settings.get();
 
-        this.config = {
-            files: Array.isArray(this.settings.files)
-                ? this.settings.files
-                : [],
-            folders: Array.isArray(this.settings.folders)
-                ? this.settings.folders
-                : []
-        };
+        Object.assign(
+            this.config,
+            {
+                files: [],
+                folders: [],
+                overrideTemplaterOnCreate: settings.overrideTemplaterOnCreate,
+            }
+        );
+
+        if (this.config.plugin.folder) {
+            this.config.folders.push({
+                pluginId: "templater-obsidian",
+                path: this.config.plugin.folder
+            })
+        }
 
         for (const [id, setting] of Object.entries(this.settings.all)) {
             this.config.files = this.config.files.concat(
                 setting.files?.map(path => ({
-                    violet: id, 
+                    packageId: id, 
                 path: this.getPackage(id).path + '/' + path
             })) ?? []
             );
 
             this.config.folders = this.config.folders.concat(
                 setting.folders?.map(path => ({
-                    violet: id,
+                    packageId: id,
                     path: this.getPackage(id).path + '/' + path
                 })) ?? []
             );
         }
+    }
 
-        if (this.pluginSettings.folder) {
-            this.config.folders.push({
-                plugin: "templater-obsidian",
-                path: this.pluginSettings.folder
-            })
+    registerOnCreate() {
+        if (!this.config.overrideTemplaterOnCreate) return;
+
+        // Disable Templater's onCreate handler
+        // https://github.com/SilentVoid13/Templater/blob/80a4b3d6d2c0321ab9243a82974d624e121a3fb5/src/settings/Settings.ts#L217-L220
+        if (this.plugin.settings.trigger_on_file_creation) {
+            this.plugin.settings.trigger_on_file_creation = false;
+            this.plugin.event_handler.update_trigger_file_on_creation();
         }
+
+        // Restore Templater's onCreate handler on unload
+        this.register(() => {
+            if (this.config.plugin.settings.trigger_on_file_creation
+                !== this.plugin.settings.trigger_on_file_creation
+            ) {
+                this.plugin.settings.trigger_on_file_creation
+                    = this.config.plugin.settings.trigger_on_file_creation;
+                
+                this.plugin.event_handler.update_trigger_file_on_creation();
+            }
+        })
+
+        // Register our own onCreate handler
+        // https://github.com/SilentVoid13/Templater/blob/80a4b3d6d2c0321ab9243a82974d624e121a3fb5/src/core/Templater.ts#L519
+        this.registerEvent(this.app.vault.on('create', async (file) => {
+            if (!(file instanceof obsidian.TFile)
+                || file.extension !== "md"
+            ) {
+                return;
+            }
+
+            // Check if file is a template
+            for (const { path } of this.config.files)
+                if (file.path === path) return;
+            for (const { path } of this.config.folders)
+                if (file.path.startsWith(path)) return;
+
+            // Wait for core plugin Note composer finish insert content
+            await new Promise((resolve) => setTimeout(resolve, 300));
+
+            // Skip if a template is waiting to be inserted
+            if (this.plugin.templater.files_with_pending_templates.has(
+                file.path
+            )) {
+                return;
+            }
+
+            /**
+             * If file isn't empty, skip insert template.
+             * This behavior is different from Templater. When the created file
+             * isn't empty, e.g., file moving within the vault, Templater won't
+             * insert a new template, but will execute existing Templater
+             * scripts in the file. This creates unexpected script execution in
+             * my opinion.
+             * https://github.com/SilentVoid13/Templater/blob/80a4b3d6d2c0321ab9243a82974d624e121a3fb5/src/core/Templater.ts#L590-L600
+             */
+            if (file.stat.size > 0) return;
+
+            const template = this.getFile(await this.resolveTemplate(file));
+            await this.plugin.templater.write_template_to_file(template, file);
+        }))
+    }
+
+    _watchTemplateUpdate() {
+        const addTemplate = (file) => {
+            // Find matching template file
+            let t = this.config.files.find(f => f.path === file.path)
+
+            // Find matching folder with deepest path
+            if (!t)
+                t = this.config.folders.filter(f => file.path.startsWith(f.path))
+                .reduce((max, t) => {
+                    return (max.path?.length ?? 0) > t.path.length? max : t;
+                }, false);
+            
+            if (!t) return;
+
+            const template = Object.assign({}, t, { file: file });
+            delete template.path;
+            this.templates.push(template);
+        }
+
+        const removeTemplate = (path) => {
+            this.templates = this.templates.filter(t => t.file.path !== path);
+        }
+
+        this.registerEvent(this.app.vault.on('create', addTemplate));
+        this.registerEvent(this.app.vault.on(
+            'delete',
+            (file) => removeTemplate(file.path)
+        ));
+        this.registerEvent(this.app.vault.on('rename', (file, oldPath) => {
+            addTemplate(file);
+            removeTemplate(oldPath);
+        }));
     }
 
     /**
      * Get all templates, including deprecated, system and update templates
      * @returns {Object[]}
      */
-    getAllTemplates(refresh = false) {
+    getTemplates(refresh = false) {
         // Cache hit
-        if (!refresh && this.allTemplates) { return this.allTemplates; }
+        if (!refresh && this.templates) { return this.templates; }
 
         let templateItems = this.config.files.map(
             item => {
@@ -122,7 +236,7 @@ class Templater extends customJS.Violet.Package {
         templateItems.sort((aItem, bItem) => {
             return aItem.file.basename.localeCompare(bItem.file.basename);
         });
-        this.allTemplates = templateItems;
+        this.templates = templateItems;
         return templateItems;
     }
     
@@ -131,7 +245,7 @@ class Templater extends customJS.Violet.Package {
      * @returns {Object[]}
      */
     getUserTemplates() {
-        return this.getAllTemplates().filter((item) => {
+        return this.getTemplates().filter((item) => {
             let name = item.file.basename;
             return !(name.startsWith("bug.")  // Bug demo
                 || name.startsWith("depr.")  // Deprecated
@@ -148,9 +262,9 @@ class Templater extends customJS.Violet.Package {
      */
     getFile(template) {
         let templateName = template.match(/^\[\[(.*)\]\]$/)?.[1] ?? template;
-        return this.getAllTemplates().find(
+        return this.getTemplates().find(
             (item => item.file.basename.localeCompare(templateName) === 0)
-        ).file;
+        )?.file;
     }
 
     getInfo(templateName) {
@@ -160,7 +274,7 @@ class Templater extends customJS.Violet.Package {
     }
 
     exists(templateName) {
-        return this.getAllTemplates().some(
+        return this.getTemplates().some(
             (item) => item.file.basename.localeCompare(templateName) === 0
         );
     }

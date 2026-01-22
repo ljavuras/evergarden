@@ -1,9 +1,18 @@
 class Periodic extends customJS.Violet.Package {
 
-    _path = "Periodic";
+    DEFAULT_CONFIG = {
+        path: "Periodic",
+        format: {
+            yearly: "YYYY",
+            quarterly: "YYYY-[Q]Q",
+            monthly: "YYYY-MM",
+            weekly: "gggg-[W]ww",
+            daily: "YYYY-MM-DD",
+        }
+    };
 
     get path() {
-        return this._path;
+        return this.config.path;
     }
 
     commands = [
@@ -61,7 +70,7 @@ class Periodic extends customJS.Violet.Package {
     onload() {
         this.commands.forEach(cmd => this.addCommand(cmd));
 
-        this.loadSettings();
+        this.buildConfig();
         this.yearly    = new this.PeriodicType(this, "year");
         this.quarterly = new this.PeriodicType(this, "quarter");
         this.monthly   = new this.PeriodicType(this, "month");
@@ -93,6 +102,13 @@ class Periodic extends customJS.Violet.Package {
             this.weekly,
             this.daily,
         ];
+    }
+
+    buildConfig() {
+        this.config = Object.assign(
+            this.DEFAULT_CONFIG,
+            this.loadSettings().get()
+        );
     }
     
     /**
@@ -219,7 +235,7 @@ class Periodic extends customJS.Violet.Package {
             this.type     = (unit == "day")? "daily" : `${unit}ly`;
             this.unit     = unit;
             this.units    = `${unit}s`;
-            this.format   = periodic.settings.format[this.type];
+            this.format   = periodic.config.format[this.type];
             this.path     = `${periodic.path}/${this.type}`;
             this.template = `note.periodic.${this.type}`;
 

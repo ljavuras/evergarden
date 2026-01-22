@@ -8,28 +8,80 @@ class Violet extends obsidian.Component {
     /** Package infos: package.json, settings.json, path */
     packages = {};
 
-    /** Settings of your own, and friend settings from other packages */
-    settings = { all: {} };
+    /**
+     * @type {Violet.Settings}
+     */
+    settings;
 
     /** Determines package behavior, parsed from settings */
     config = {
-        customjs: { files: [], mapping: {} }
+        customjs: { scripts: [], mapping: {} }
     };
 
     /** Functions that execute when a package is ready */
     _onReady = {};
 
-    constructor() {
-        super();
-        this.initViolet();
-    }
-
+    /**
+     * Gets CustomJS class instances from a package.
+     * @param {string} packageId - Target package.
+     * @returns {Record<string, object>} Class instances from targeted package.
+     */
     require(packageId) {
         return this.packages[packageId]?.customjs;
     }
 
-    getIdByClassName(className) {
-        return this.config.customjs.mapping[className]?.id;
+    /**
+     * Gets package by provided CustomJS class instance.
+     * @param {object} cjsInstance - Target CustomJS class instance.
+     * @returns {string} Package id of the instance belongs to.
+     */
+    getPackageByInstance(cjsInstance) {
+        for (const [id, { customjs }] of Object.entries(this.packages)) {
+            if (!customjs) continue;
+            for (const instance of Object.values(customjs)) {
+                if (cjsInstance === instance) return id;
+            }
+        }
+        return null;
+    }
+
+    getPackageNameById(id) {
+        return this.packages[id]?.pkg.name;
+    }
+
+    constructor() {
+        super();
+        window.VPS = this;
+        this.initViolet();
+    }
+
+    onload() {
+        const updateSettingsFromFile = async (file, erase=false) => {
+            const packageId = file.parent.path.slice(
+                this.config.packagesPath.length
+            );
+            this.packages[packageId]?.settings.set(
+                erase
+                    ? {}
+                    : JSON.parse(await this.app.vault.cachedRead(file)),
+                true
+            );
+        }
+        this.registerEvent(this.app.vault.on('create', async (file) => {
+            if (file instanceof obsidian.TFile)
+                if (file.name === "settings.json")
+                    await updateSettingsFromFile(file);
+        }));
+        this.registerEvent(this.app.vault.on('modify', async (file) => {
+            if (file instanceof obsidian.TFile)
+                if (file.name === "settings.json")
+                    await updateSettingsFromFile(file);
+        }));
+        this.registerEvent(this.app.vault.on('delete', async (file) => {
+            if (file instanceof obsidian.TFile)
+                if (file.name === "settings.json")
+                    await updateSettingsFromFile(file, true);
+        }));
     }
 
     get packageId() {
@@ -37,36 +89,43 @@ class Violet extends obsidian.Component {
     }
 
     async initViolet() {
-        await this.loadSelfSettings();
-        await this.loadPackages();
-        this.loadSettings();
-        this.createConfig();
+        await this.loadPackagesPath();
+        await this.loadAllPackages();
+        this.settings = this.loadSettings();
+        this.buildConfig();
         await this.mountCJSInstances();
         this.load();  // Load all child components (packages)
     }
 
-    createConfig() {
-        this.config.packagesPath = this.settings.packagesPath;
+    buildConfig() {
+        this.config = {
+            packagesPath: this.settings.get()?.packagesPath,
+            customjs: { scripts: [], mapping: {} }
+        };
 
+        // Find scripts from every pacakges' files & folders friend setting
         for (const [id, settings] of Object.entries(this.settings.all)) {
             const packagePath = this.packages[id].path;
 
             const scripts = []
             .concat(
-                settings.customjs.files?.map(path =>
+                // Individual files from `friend['violet-core'].customjs.files`
+                settings.customjs?.files?.map(path =>
                     this.app.vault.getFileByPath(
                         obsidian.normalizePath(`${packagePath}/${path}`)
                     )
                 )
             )
             .concat(
-                settings.customjs.folders
+                // Folders from `friend['violet-core'].customjs.folders`
+                settings.customjs?.folders
                 ?.map(path =>
                     this.app.vault.getFolderByPath(
                         obsidian.normalizePath(`${packagePath}/${path}`)
                     )
                 )
                 ?.map((folder) => {
+                    // Get all *.js files within the folder
                     let scripts = [];
                     obsidian.Vault.recurseChildren(folder, (file) => {
                         if (file instanceof obsidian.TFile
@@ -81,7 +140,7 @@ class Violet extends obsidian.Component {
             )
             .filter(file => file);  // remove null
 
-            this.config.customjs.files = this.config.customjs.files.concat(scripts);
+            this.config.customjs.scripts.push(...scripts);
             scripts.map((file) => {
                 this.config.customjs.mapping[getClassNameByScript(file)] = {
                     id: id,
@@ -108,41 +167,35 @@ class Violet extends obsidian.Component {
      * Load settings of only this package
      * @returns {object}
      */
-    async loadSelfSettings() {
+    async loadPackagesPath() {
         // Find violet-core/settings.json
         // TODO(perf): avoid filter all files in vault, read CustomJS settings,
         // and find violet-core package location
         const settingsFile = app.vault.getFiles().filter(
-            (tfile) => tfile.path.endsWith("/violet-core/settings.json")
+            (tfile) => tfile.path.endsWith(`/${this.packageId}/settings.json`)
         )?.[0];
+        if (!settingsFile) {
+            throw new Error(
+                `VPS: settings.json not found for package ${this.packageId}`
+            );
+        }
 
-        // TODO: handle error
-        if (!settingsFile) { return; }
+        this.config.packagesPath = JSON.parse(
+            await app.vault.cachedRead(settingsFile)
+        ).packagesPath;
 
-        this.settings = Object.assign(
-            this.settings,
-            JSON.parse(await app.vault.cachedRead(settingsFile))
-        )
-
-        return this.settings;
+        if (!this.config.packagesPath) {
+            throw new Error(
+                `VPS: settings.json didn't define packagesPath (path of packages)`
+            );
+        }
     }
 
     /**
-     * Compose settings from self and friend packages
-     * @returns {object}
+     * @returns {this.Settings}
      */
     loadSettings() {
-        for (const [id, packageInfo] of Object.entries(this.packages)) {
-            if (this.packageId === id) {
-                this.settings.all[id] = packageInfo.settings;
-                continue;
-            }
-            let friend = packageInfo?.settings?.friend?.[this.packageId];
-            if (friend) {
-                this.settings.all[id] = friend;
-            }
-        }
-        return this.settings;
+        return this.packages[this.packageId].settings;
     }
 
     /**
@@ -158,12 +211,14 @@ class Violet extends obsidian.Component {
                 continue;
             }
 
-            // Create CustomJS class instance
-            await customJS.app.plugins.getPlugin('customjs').evalFile(file.path);
+            // CustomJS creates class instance
+            await this.app.plugins.getPlugin('customjs').evalFile(file.path);
+
+            // Get instance from CustomJS
             let instance = customJS[className];
             if (!instance) return;
 
-            // Mount class instance to Violet.packages[id].customJS
+            // Store class instance to each package profile: Violet.packages[id].customJS
             this.packages[id].customjs = this.packages[id].customjs ?? {};
             this.packages[id].customjs[className] = instance;
 
@@ -178,49 +233,56 @@ class Violet extends obsidian.Component {
      * CustomJS classes doesn't know their own path (efficiently), thus their
      * info are supplied by this package.
      */
-    async loadPackages() {
+    async loadAllPackages() {
         // Parse all settings.json & package.json under package path
-        const packageConfigsFiles = app.vault.getFiles()
+        const packageConfigFiles = app.vault.getFiles()
         .filter(
             // Get all config files under package path
-            (tfile) => tfile.path.startsWith(this.settings.packagesPath)
+            (tfile) => tfile.path.startsWith(this.config.packagesPath)
                 && (tfile.path.endsWith("/settings.json")
                 || tfile.path.endsWith("/package.json"))
         )
 
-        await Promise.all(packageConfigsFiles.map(async (configFile) => {
+        await Promise.all(packageConfigFiles.map(async (configFile) => {
                 await this.parsePackageConfigs(configFile);
             })
         );
+    
+        for (const packageId of Object.keys(this.packages)) {
+            if (!this.packages[packageId].settings) {
+                this.packages[packageId].settings = new this.Settings(packageId);
+            }
+        }
     }
 
     async parsePackageConfigs(configFile) {
         // Assumes package folder == package id
-        const packageId = configFile.parent.name;
-        const configContent = await app.vault.cachedRead(configFile)
-            .then((configJSON) => JSON.parse(configJSON));
+        const packageId = configFile.parent.path.slice(this.config.packagesPath.length);
+        const configContent = JSON.parse(
+            await app.vault.cachedRead(configFile)
+        );
 
         if (!this.packages[packageId]) {
             this.packages[packageId] = {};
         }
 
         if (configFile.basename == "settings") {
-            this.packages[packageId].settings = configContent;
+            this.packages[packageId].settings = (
+                new this.Settings(packageId)
+            ).set(configContent);
         } else if (configFile.basename == "package") {
             this.packages[packageId].pkg = configContent;
         }
 
         // Workaround for CustomJS not enabling classes to get script info
         this.packages[packageId].path = configFile?.parent?.path;
-
-        return configContent;
     }
 
     registerOnReady(packageId, className, callback) {
         this._onReady[`${packageId}:${className}`] ??= [];
         this._onReady[`${packageId}:${className}`].push(callback);
         if (this.packages[packageId]?.customjs?.[className]?._loaded) {
-            callback();
+            callback(this.packages[packageId].customjs[className]);
         }
     }
 
@@ -232,14 +294,218 @@ class Violet extends obsidian.Component {
 
     deconstructor() {
         this.unload();
+        delete window.VPS;
     }
 
-    Package = class extends obsidian.Component {
+    /**
+     * Controlled settings interface that ensures reliable propagation of
+     * inter-package (`friend`) settings within VPS.
+     * 
+     * Fires update event when updated by either itself or a friendly package.
+     */
+    Settings = class Settings extends obsidian.Events {
+        #settings = {};
+        #packageId;
+
+        constructor(packageId) {
+            super();
+            this.#packageId = packageId;
+        }
+
+        /**
+         * Returns an object that represents the setting this package owns, not
+         * including settings other packages contributes to this package.
+         * Modification on this object **does not** update a package's settings.
+         * @returns {any} Current setting.
+         */
+        get() {
+            return structuredClone(this.#settings);
+        }
+
+        /**
+         * Returns the difference between updated and original object. Defaults
+         * to compare with current settings.
+         * {@link https://github.com/mattphillips/deep-object-diff/blob/a24d61fea6d6d644fc3e32a853f685953d6d5b41/src/diff.js}
+         * @param {Object} newObj - Updated object
+         * @param {Object} oldObj - Original object
+         * @returns {Object}
+         */
+        diff(newObj, oldObj = this.#settings) {
+            const isObject = (o) =>
+                o != null && typeof o === "object";
+            const isEmptyObject = (o) =>
+                isObject(o) && Object.keys(o).length === 0;
+
+            if (newObj === oldObj) return {};
+            if (!isObject(oldObj) || !isObject(newObj)) return newObj;
+            if ((oldObj instanceof Date) || (newObj instanceof Date)) {
+                if (oldObj.valueOf() == newObj.valueOf()) return {};
+                return newObj;
+            }
+
+            // Mark deleted keys as undefined
+            const deletedValues = Object.keys(oldObj).reduce((acc, key) => {
+                if (!Object.hasOwn(newObj, key))
+                    acc[key] = undefined;
+                return acc;
+            }, Object.create(null));
+
+            return Object.keys(newObj).reduce((acc, key) => {
+                if (!Object.hasOwn(oldObj, key)) {
+                    acc[key] = newObj[key];
+                    return acc;
+                }
+
+                const difference = this.diff(newObj[key], oldObj[key]);
+
+                if (isEmptyObject(difference) && !(difference instanceof Date)
+                    && (isEmptyObject(oldObj[key]) || !isEmptyObject(newObj[key]))
+                )
+                    return acc;  // No diff
+
+                acc[key] = difference;
+                return acc;
+            }, deletedValues);
+        } 
+
+        _triggerUpdate(update) {
+            // Trigger settings update events for affected packages
+            const selfUpdate = update;
+            delete selfUpdate.friend;
+            if (Object.keys(update).some(key => key !== "friend")) {
+                this.trigger("update", this.#packageId, selfUpdate);
+            }
+            for (const packageId of Object.keys(update.friend ?? {})) {
+                VPS.packages[packageId].settings
+                    .trigger("update", this.#packageId, update.friend[packageId]);
+            }
+        }
+
+        /**
+         * The function to call when settings is updated.
+         * @callback settingsUpdateCallback
+         * @param {string} packageId - The package that triggered the update
+         * @param {object} update - Updated part of the setting.
+         */
+
+        /**
+         * Register a callback for settings update.
+         * @function on
+         * @overload
+         * @param {"update"} name - Event name.
+         * @param {settingsUpdateCallback} callback - Called on settings update.
+         * @return {EventRef}
+         */
+
+        /**
+         * Set its settings without triggering update events on itself and
+         * friend settings.
+         * @param {Object} settings - The new setting.
+         * @param {boolean} trigger - Fire events to affected packages if true.
+         * @returns {Violet.Settings} Returns itself, allows chaining
+         */
+        set(settings, trigger = false) {
+            if (trigger)
+                var update = this.diff(settings);
+            this.#settings = structuredClone(settings) ?? {};
+            if (trigger) this._triggerUpdate(update);
+            return this;
+        }
+
+        /**
+         * Assigns one or more partial setting objects to this settings, similar
+         * to `Object.assign()`.
+         * 
+         * Differences from `Object.assign()`:
+         * - Triggers a update event on itself after assignment.
+         * - Keys with `undefined` value are removed.
+         * - Updates to friend settings triggers update events on corresponding
+         *   settings objects.
+         * @param  {...Object} patches - Part of the settings that are to be
+         * updated.
+         * @returns {Violet.Settings} Returns itself to allow chaining.
+         */
+        assign(...patches) {
+            const update = Object.assign(...patches);
+            Object.assign(this.#settings, update);
+            
+            // Delete keys with value === undefined
+            const pruneUndefined = (setting) => {
+                const prunedSetting = {};
+                Object.keys(setting).forEach((key) => {
+                    if (setting[key] === Object(setting[key]))
+                        prunedSetting[key] = pruneUndefined(setting[key]);
+                    else if (setting[key] !== undefined)
+                        prunedSetting[key] = setting[key];
+                })
+                return prunedSetting;
+            }
+            this.#settings = pruneUndefined(this.#settings);
+            this._triggerUpdate(update);
+            return this;
+        }
+
+        /**
+         * Similar to {@link Violet.Settings#assign}, but doesn't accept
+         * `undefined` value.
+         * Use this method if you do not wish to accidentally delete keys from
+         * settings.
+         * @param  {...any} patches - Part of the settings that are to be
+         * updated
+         * @returns {Violet.Settings} Returns itself to allow chaining.
+         */
+        patch(...patches) {
+            const update = Object.assign(...patches)
+            const validatePatch = (patch) => {
+                Object.keys(patch).forEach((key) => {
+                    if (patch[key] === undefined) {
+                        throw new Error(
+                            `Settings.patch(): attempting to update settings with undefined value on key ${key}. `
+                            + `Use Settings.assign() to delete keys by assigning undefined, or provide a valid value.`
+                        );
+                    }
+                    if (patch[key] === Object(patch[key]))
+                        validatePatch(patch[key]);
+                });
+            }
+            patches.forEach(patch => validatePatch(patch));
+            this.assign(this.#settings, update);
+            this._triggerUpdate(update);
+            return this;
+        }
+
+        /**
+         * All settings every package contributes to this package, includes
+         * itself.
+         * @type {Object}
+         */
+        get all() {
+            const all = {};
+            for (const [friendId, pkg] of Object.entries(window.VPS.packages)) {
+                const friendSetting = pkg.settings?.friend(this.#packageId);
+                if (friendSetting) all[friendId] = friendSetting;
+            }
+            return all;
+        }
+
+        /**
+         * Gets the setting this package contributes to package `friendId`.
+         * @param {string} friendId - The target package this package
+         * contributes settings to.
+         * @returns {Object | undefined}
+         */
+        friend(friendId) {
+            if (friendId === this.#packageId) return this.get();
+            return structuredClone(this.#settings.friend?.[friendId]);
+        }
+    }
+
+    Package = class Package extends obsidian.Component {
         app = customJS.app;
         Violet = customJS.Violet;
 
         get packageId() {
-            return this.Violet.getIdByClassName(this.constructor.name);
+            return this.Violet.getPackageByInstance(this);
         }
 
         get path() {
@@ -252,7 +518,7 @@ class Violet extends obsidian.Component {
             const asyncFns = [];
             this.Violet._onReady[`${this.packageId}:${this.constructor.name}`]
             ?.forEach((callback) => {
-                const promise = callback();
+                const promise = callback(this);
                 if (promise) { asyncFns.push(promise); }
             });
             if (asyncFns.length > 0) {
@@ -270,21 +536,8 @@ class Violet extends obsidian.Component {
             return this.pkg;
         }
 
-        loadSettings(force = false) {
-            if (!force && this.settings) { return this.settings; }
-            this.settings = this.Violet.packages[this.packageId].settings;
-            this.settings.all = {}
-            for (const [id, packageInfo] of Object.entries(this.Violet.packages)) {
-                if (this.packageId === id) {
-                    this.settings.all[id] = packageInfo.settings;
-                    continue;
-                }
-                let friend = packageInfo.settings?.friend?.[this.packageId];
-                if (friend) {
-                    this.settings.all[id] = friend;
-                }
-            }
-            return this.settings;
+        loadSettings() {
+            return window.VPS.packages[this.packageId].settings;
         }
 
         async saveSettings() {
@@ -346,9 +599,13 @@ class Violet extends obsidian.Component {
          */
         registerEmbed(embedSpec) {
             embedSpec.id = `${this.packageId}:${embedSpec.id}`;
-            this.onPackageReady("evergarden-auto-embed", "AutoEmbed", () => {
-                customJS.AutoEmbed.registerEmbed(embedSpec);
-            });
+            this.onPackageReady(
+                "evergarden-auto-embed",
+                "AutoEmbed",
+                (AutoEmbed) => {
+                    AutoEmbed.registerEmbed(embedSpec);
+                }
+            );
             this.register(() => customJS.AutoEmbed?.unregisterEmbed(embedSpec.id));
         }
 
