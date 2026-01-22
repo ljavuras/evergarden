@@ -33,19 +33,19 @@ class Datacore extends customJS.Violet.Package {
         // Update `config.scripts` on script update
         const updateDatacoreIndex = (file) => {
             if (!file.extension) return;
-                if (ADDITIONAL_EXTENSIONS.has(file.extension.toLowerCase())) {
-                    this.core.trigger("update", this.core.revision);
-                }
+            if (ADDITIONAL_EXTENSIONS.has(file.extension.toLowerCase())) {
+                this.core.trigger("update", this.core.revision);
+            }
         }
 
         for (const vaultEvent of ['create', 'delete', 'rename']) {
-        this.registerEvent(
+            this.registerEvent(
                 this.vault.on(vaultEvent, (file, oldPath) => {
-                if (!(file instanceof obsidian.TFile)) return;
+                    if (!(file instanceof obsidian.TFile)) return;
                     updateDatacoreIndex(file);
                     this.updateConfig(vaultEvent, file, oldPath);
-            })
-        );
+                })
+            );
         }
 
         this.buildConfig();
@@ -67,8 +67,8 @@ class Datacore extends customJS.Violet.Package {
             this.config.files = this.config.files.concat(
                 setting.files?.map(path => ({
                     packageId: id,
-                path: this.getPackage(id).path + '/' + path
-            })) ?? []
+                    path: this.getPackage(id).path + '/' + path
+                })) ?? []
             );
 
             this.config.folders = this.config.folders.concat(
@@ -108,7 +108,8 @@ class Datacore extends customJS.Violet.Package {
                 return maxFolderItem.path.length > folderItem.path.length
                     ? maxFolderItem
                     : folderItem;
-            });
+            }, null);
+            if (!folderItem) return;
 
             this.config.scripts[folderItem.packageId] ??= {};
             this.config.scripts[folderItem.packageId][file.basename] = file.path;
@@ -124,7 +125,8 @@ class Datacore extends customJS.Violet.Package {
                 return maxFolderItem.path.length > folderItem.path.length
                     ? maxFolderItem
                     : folderItem;
-            });
+            }, null);
+            if (!folderItem) return;
 
             delete this.config.scripts[folderItem.packageId]?.[scriptName];
         }
@@ -220,9 +222,17 @@ class Datacore extends customJS.Violet.Package {
         /**
          * Loads a script with package support and additional features:
          * 
-         * - Automatic style injection - Stylesheets in the same directory
-         *   whose names match the script name or exported component names
-         *   are automatically included.
+         * - Automatic style injection:
+         *   ```
+         *   path/to/package/
+         *   ├── datacore
+         *   |   ├── Script.tsx     # Datacore script exporting `Component`
+         *   |   ├── Script.css     # Styles scoped to the script
+         *   |   └── Component.css  # Styles scoped to the component
+         *   └── styles.css         # Styles scoped to the package
+         *   ```
+         *   When `Script.tsx` is loaded, `Component.css`, `Script.css` and
+         *   styles.css` are injected into `Component`.
          * - Error boundary - Displays errored component name, script path, and
          *   logs the error to console.
          * - Dev mode auto-refresh - When `dc.config.dev` is `true`, exported
@@ -243,11 +253,19 @@ class Datacore extends customJS.Violet.Package {
          * @returns {any}
          */
         async require(pathOrPackage, scriptName) {
+            const packageName = scriptName? pathOrPackage : null;
             const scriptPath = scriptName
                 ? await this.violetDatacore.getScriptPath(pathOrPackage, scriptName)
                 // Convert Link to string
                 // https://github.com/blacksmithgu/datacore/blob/31a8b18b0978f8b06d03d6dabcf023a7362b56f2/src/api/script-cache.ts#L127
                 : (pathOrPackage.obsidianLink? pathOrPackage.obsidianLink() : pathOrPackage);
+            const pkg = Object.values(this.violetDatacore.Violet.packages)
+                .filter((pkg) => scriptPath.startsWith(pkg.path))
+                .reduce((pkg, currentPkg) => {
+                    if (currentPkg.path.length > pkg.path.length)
+                        return currentPkg;
+                    return pkg;
+                });
 
             const scriptObject = await this.load(scriptPath);
             const { 
@@ -266,6 +284,7 @@ class Datacore extends customJS.Violet.Package {
                 if (typeof Component === "function") {
                     return ({[Component.name]: ({ ...props }) =>
                         h(Wrapper, {
+                            pkg: pkg,
                             component: Component,
                             scriptPath: scriptPath,
                             ...props
@@ -281,6 +300,43 @@ class Datacore extends customJS.Violet.Package {
             }
 
             return wrapComponent(scriptObject);
+        }
+
+        async render(Component, props, containerEl) {
+            const { h, render } = this.preact;
+
+            if (!Component) {
+                render(null, containerEl);  // Destroy mounted components
+                return;
+            }
+
+            const scriptPath = this.scriptPath(Component);
+            const pkg = Object.values(this.violetDatacore.Violet.packages)
+                .filter((pkg) => scriptPath.startsWith(pkg.path))
+                .reduce((pkg, currentPkg) => {
+                    if (currentPkg.path.length > pkg.path.length)
+                        return currentPkg;
+                    return pkg;
+                });
+            
+            const { 
+                ComponentWrapper,
+                AutoRefreshComponentWrapper
+            } = await this.load("violet-datacore", "ComponentWrapper");
+            // Use `AutoRefreshComponentWrapper` if `dc` is in dev mode
+            const Wrapper = this.config?.dev
+                ? AutoRefreshComponentWrapper
+                : ComponentWrapper;
+
+            render(
+                h(Wrapper, {
+                    pkg: pkg,
+                    component: Component,
+                    scriptPath: scriptPath,
+                    ...props
+                }),
+                containerEl
+            );
         }
 
         /**
