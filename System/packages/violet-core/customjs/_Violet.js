@@ -219,7 +219,7 @@ class Violet extends obsidian.Component {
             if (!instance) return;
 
             // Store class instance to each package profile: Violet.packages[id].customJS
-            this.packages[id].customjs = this.packages[id].customjs ?? {};
+            this.packages[id].customjs ??= {};
             this.packages[id].customjs[className] = instance;
 
             // Mount class instancs as Violet component child
