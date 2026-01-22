@@ -297,12 +297,20 @@ class AutoEmbed extends customJS.Violet.Package {
 
             let node = tree.topNode.firstChild;
             if (!node) return Decoration.none;
-            while (node.name?.includes("frontmatter")) {
+            
+            // Default to start of first node if no frontmatter exist
+            frontmatterPos = node.from;
+            
+            while (node && node.name?.includes("frontmatter")) {
                 frontmatterPos = node.to;
                 node = node.nextSibling;
             }
+
+            // Default to end of last node if no footnote at the end
             node = tree.topNode.lastChild;
-            while (node.name?.includes("footnote")) {
+            footnoteStart = node.to;
+
+            while (node && node.name?.includes("footnote")) {
                 footnoteStart = node.from;
                 node = node.prevSibling;
             }
