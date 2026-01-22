@@ -2,7 +2,7 @@
 /**
  * Project main page
  * 
- * @version 3
+ * @version 4
  * @author Ljauvras <ljavuras.py@gmail.com>
  */
 
@@ -19,10 +19,6 @@ tp.addTags(['a/project']);
 
 let projectName = tp.file.title;
 -%>
-```datacoretsx
-await cJS(({ Datacore }) => dc = Datacore.wrap(dc));
-return await dc.require("evergarden-project", "Navigation");
-```
 # <% projectName %>
 
 <% tp.file.cursor() %>

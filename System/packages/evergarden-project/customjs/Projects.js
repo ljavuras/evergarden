@@ -1,13 +1,15 @@
 class Projects extends customJS.Violet.Package {
-    onload() {
-        this.commands.forEach(cmd => this.addCommand(cmd));
-    }
 
     // All project folder stays under this path
     _path = "Project";
 
     get path() {
         return this._path;
+    }
+
+    onload() {
+        this.commands.forEach(cmd => this.addCommand(cmd));
+        this.embeds.forEach((embedSpec) => this.registerEmbed(embedSpec));
     }
 
     /**
@@ -86,6 +88,13 @@ class Projects extends customJS.Violet.Package {
      * @returns {Projects.Project}
      */
     getProjectByPath(path) {
+        const mainNote = this._getProjectFileByPath(path);
+        if (mainNote) {
+            return new this.Project(mainNote);
+        }
+    }
+
+    _getProjectFileByPath(path) {
         let name = path.match(new RegExp(
             `^${this._path}\/(?<name>[^\/]+)`
         ))?.groups.name;
@@ -97,7 +106,7 @@ class Projects extends customJS.Violet.Package {
         
         if (!file) { return; }
         if (this.isProject(file)) {
-            return new this.Project(file);
+            return file;
         }
     }
 
@@ -110,6 +119,15 @@ class Projects extends customJS.Violet.Package {
         if (this.isProject(file)) {
             return new this.Project(file);
         }
+    }
+
+    isInProject(fileOrPath) {
+        const path = (typeof fileOrPath === 'string')
+        ? fileOrPath
+        : (fileOrPath instanceof obsidian.TFile? fileOrPath.path : null);
+
+        if (!path) { return false; }
+        return !!this._getProjectFileByPath(path);
     }
 
     /** 
@@ -174,6 +192,23 @@ class Projects extends customJS.Violet.Package {
                 await Templater.plugin.editor_handler
                     .jump_to_next_cursor_location(project.file, true);
             }
+        },
+    ]
+
+    embeds = [
+        {
+            id: `top-nav-bar`,
+            order: -1,
+            shouldEmbed: (view) => this.isInProject(view.path),
+            renderEmbed: (el, view) => {
+                datacore.executeJsx(
+                    `await cJS(({ Datacore }) => dc = Datacore.wrap(dc));
+                    return await dc.require("evergarden-project", "Navigation");`,
+                    el,
+                    view,
+                    view.path
+                )
+            },
         },
     ]
 

@@ -1,14 +1,9 @@
 ---
 created: 2025-01-06T18:09:27.410+08:00
 template/name: "[[note.project.notes]]"
-template/version: 3
+template/version: 4
 project/main: "[[Project Violet]]"
 ---
-```datacoretsx
-await cJS(({ Datacore }) => dc = Datacore.wrap(dc));
-return await dc.require("evergarden-project", "Navigation");
-```
-
 > [!ATTENTION]
 > The plugin is still **under development**, none of the features described in this note are released, please **DO NOT** follow instructions from [[#Migrate scripts from *CustomJS*]].
 > 

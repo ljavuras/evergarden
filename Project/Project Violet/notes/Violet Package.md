@@ -1,13 +1,9 @@
 ---
 created: 2025-01-06T18:06:10.880+08:00
 template/name: "[[note.project.notes]]"
-template/version: 3
+template/version: 4
 project/main: "[[Project Violet]]"
 ---
-```datacoretsx
-await cJS(({ Datacore }) => dc = Datacore.wrap(dc));
-return await dc.require("evergarden-project", "Navigation");
-```
 # Violet Package
 
 A package is a folder that contains user scripts (*Templater* templates, *CustomJS* scripts, *Datacore* scripts...etc), implementing a workflow. Drop the folder into your designated directory, and the workflow becomes available in your vault.

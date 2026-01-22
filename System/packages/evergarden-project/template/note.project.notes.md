@@ -1,8 +1,9 @@
-<%*
+//<%*
+tR = "";
 /**
  * Project notes
  * 
- * @version 3
+ * @version 4
  * @author Ljavuras <ljavuras.py@gmail.com>
  */
 
@@ -31,10 +32,6 @@ tp.setFrontMatter({
 
 // Moves cursor to end of file
 await tp.include("[[system.cmd.cursor.move.eof]]", false);
--%>
-```datacoretsx
-await cJS(({ Datacore }) => dc = Datacore.wrap(dc));
-return await dc.require("evergarden-project", "Navigation");
-```
+//-%>
 # <% tp.file.title %>
 

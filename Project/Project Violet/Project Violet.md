@@ -4,13 +4,9 @@ project/state: active
 tags:
   - a/project
 template/name: "[[note.project.main]]"
-template/version: 3
+template/version: 4
 project/kanban: "[[Kanban - Project Violet]]"
 ---
-```datacoretsx
-await cJS(({ Datacore }) => dc = Datacore.wrap(dc));
-return await dc.require("evergarden-project", "Navigation");
-```
 # Project Violet
 
 A project focused on creating **modular** and **shareable** user scripts for *Obsidian*.

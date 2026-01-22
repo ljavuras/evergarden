@@ -678,5 +678,6 @@ class IssueInfoExporter {
     }
 }
 
-await dv.view("System/script/Dataview/project/Navigation");
+// Replaced by auto-embed
+// await dv.view("System/script/Dataview/project/Navigation");
 new IssueTracker(options).render(containerEl);
