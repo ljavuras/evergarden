@@ -1,0 +1,196 @@
+/**
+ * @author Ljavuras <ljavuras.py@gmail.com>
+ */
+
+.evergarden.templates,
+.evergarden.template-detail {
+    --color-latest: var(--color-green);
+    --color-updatable: var(--color-yellow);
+    --color-outdated: var(--color-red);
+
+    .text-faint {
+        color: var(--text-faint);
+    }
+}
+
+.evergarden.templates {
+    /* Hide table header */
+    .datacore-table thead {
+        display: none;
+    }
+
+    .datacore-table-group-header .template-source {
+        display: flex;
+        align-items: center;
+        gap: var(--size-4-2);
+        font-size: var(--font-text-size);
+
+        .name {
+            font-weight: var(--font-black);
+        }
+        
+        .path {
+            padding: 0;
+        }
+
+        .id {
+            margin-left: auto;
+            font-size: var(--font-smaller);
+            color: var(--text-faint);
+        }
+    }
+    
+    .datacore-table-row {
+        padding: 0 var(--size-4-2);  /* Align with group header */
+
+        &:hover {
+            background-color: var(--datacore-table-header-background-hover) !important;
+        }
+
+        .datacore-table-cell {
+            border-right: unset;  /* Remove vertical borders */
+        }
+
+        /* Template name */
+        .datacore-table-cell:first-child {
+            padding-left: calc(var(--size-4-2) + .65em);  /* Align with pill text */
+        }
+        .datacore-table-cell:not(:first-child) {
+            width: 1px;
+            white-space: nowrap;
+        }
+
+        .outdated-indicator,
+        .updatable-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--size-4-1);
+        }
+        .outdated-indicator {
+            color: var(--color-outdated);
+        }
+        .updatable-indicator {
+            color: var(--color-updatable);
+        }
+
+        .note-count {
+            text-align: right;
+        }
+    }
+}
+
+.evergarden.template-detail {
+
+    .excerpt {
+        margin-bottom: var(--size-4-4);
+    }
+
+    .summary {
+        font-size: var(--font-smaller);
+        color: var(--text-muted);
+    }
+
+    .template-progress {
+        --progress-bar-height: var(--size-4-2);
+        margin: var(--size-4-2) 0;
+
+        .progress {
+            display: flex;
+            gap: var(--size-2-1);
+            border-radius: var(--progress-bar-height);
+
+            .progress-item {
+                height: var(--progress-bar-height);
+                transition: width var(--anim-duration-moderate) var(--anim-motion-smooth),
+                            border-radius var(--anim-duration-moderate) var(--anim-motion-smooth);
+            }
+            .progress-item:first-child {
+                border-top-left-radius: var(--progress-bar-height);
+                border-bottom-left-radius: var(--progress-bar-height);
+            }
+            .progress-item:last-child {
+                border-top-right-radius: var(--progress-bar-height);
+                border-bottom-right-radius: var(--progress-bar-height);
+            }
+            .progress-item.latest {
+                background-color: var(--color-latest);
+            }
+            .progress-item.updatable {
+                background-color: var(--color-updatable);
+            }
+            .progress-item.outdated {
+                background-color: var(--color-outdated);
+            }
+        }
+
+        .progress-legend {
+            display: flex;
+            column-gap: var(--size-4-2);
+            margin-block-start: var(--size-4-1);
+            margin-block-end: var(--size-4-1);
+
+            .legend {
+                font-size: var(--font-smaller);
+
+                .label {
+                    color: var(--text-muted);
+                }
+            }
+            .legend::marker {
+                content: '●  ';
+                margin-right: var(--size-4-1);
+            }
+            .legend.latest::marker {
+                color: var(--color-green);
+            }
+            .legend.updatable::marker {
+                color: var(--color-yellow);
+            }
+            .legend.outdated::marker {
+                color: var(--color-red);
+            }
+        }
+    }
+
+    .update-all {
+        display: flex;
+        margin-left: auto;
+    }
+
+    .note-list {
+        margin-top: var(--size-4-4);
+        
+        /* Remove outer borders */
+        border: unset;
+
+        .note {
+            display: flex;
+            margin-bottom: var(--size-2-1);
+            color: var(--text-muted);
+            font-size: var(--font-smaller);
+            text-decoration: none;
+            border-radius: var(--radius-s);
+            cursor: default;
+
+            .title, .version {
+                padding: var(--size-4-1) var(--size-4-2);
+                white-space: nowrap;
+            }
+            .title {
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .version {
+                margin-left: auto;
+            }
+
+            /* Respond when hovering only on .note and not .update-note */
+            &:hover:not(:has(.update-note:hover)) {
+                text-decoration: none;
+                color: var(--text-normal);
+                background-color: var(--background-modifier-hover);
+            }
+        }
+    }
+}

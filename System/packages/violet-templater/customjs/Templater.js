@@ -28,7 +28,7 @@ class Templater extends customJS.Violet.Package {
     config = {
         files: [],
         folders: [],
-    // Templater plugin settings
+        // Templater plugin settings
         plugin: {
             folder: this.plugin.settings.templates_folder,
             // Backup up original settings
@@ -93,8 +93,8 @@ class Templater extends customJS.Violet.Package {
             this.config.files = this.config.files.concat(
                 setting.files?.map(path => ({
                     packageId: id, 
-                path: this.getPackage(id).path + '/' + path
-            })) ?? []
+                    path: this.getPackage(id).path + '/' + path
+                })) ?? []
             );
 
             this.config.folders = this.config.folders.concat(
@@ -239,7 +239,7 @@ class Templater extends customJS.Violet.Package {
         this.templates = templateItems;
         return templateItems;
     }
-    
+
     /**
      * Get templates meant to be used by users
      * @returns {Object[]}
@@ -251,6 +251,8 @@ class Templater extends customJS.Violet.Package {
                 || name.startsWith("depr.")  // Deprecated
                 || name.startsWith("system.")  // System templates
                 || name.match(/\.update\.\d+$/)  // Updater templates
+                || name.match(/\.parse\.\d+$/)  // Parser templates
+                || name.match(/\.compose\.\d+$/)  // Composer templates
             );
         });
     }
@@ -280,14 +282,16 @@ class Templater extends customJS.Violet.Package {
     }
 
     /**
-     * Returns a template based on current state
-     * @returns {string} - Template name
+     * Finds a template for the given file.
+     * @param {TFile} file - Target file to insert template.
+     * @returns {Promise<string>} - Template name.
+     * @todo Return TFile allows same template name from multiple packages.
      */
-    async resolveTemplate(running_config) {
+    async resolveTemplate(file) {
 
         let state = {
-            targetFile:   running_config.target_file,
-            previousFile: customJS.Obsidian.workspace.getPreviousFile(),
+            file: file,
+            prevFile: customJS.Obsidian.workspace.getPreviousFile(),
         };
 
         // Each resolver tries to resolve a template, returns undefined if
@@ -300,7 +304,7 @@ class Templater extends customJS.Violet.Package {
              */
             (state) => {
                 if (moment(
-                        state.targetFile.basename,
+                        state.file.basename,
                         customJS.UniqueNoteCreator?.settings.format,
                         true
                     ).isValid()) {
@@ -313,7 +317,7 @@ class Templater extends customJS.Violet.Package {
              * File name starts with `a-`
              */
             (state) => {
-                if (state.targetFile.basename.startsWith("a-")) {
+                if (state.file.basename.startsWith("a-")) {
                     return "note.area";
                 }
             },
@@ -323,7 +327,7 @@ class Templater extends customJS.Violet.Package {
              * File name ends with ` (Series)`
              */
             (state) => {
-                if (state.targetFile.basename.endsWith(" (Series)")) {
+                if (state.file.basename.endsWith(" (Series)")) {
                     return "note.library.series";
                 }
             },
@@ -334,7 +338,7 @@ class Templater extends customJS.Violet.Package {
              */
             (state) => {
                 let periodicType = customJS.Periodic?.getType(
-                    state.targetFile.basename
+                    state.file.basename
                 );
 
                 if (periodicType) {
@@ -353,13 +357,13 @@ class Templater extends customJS.Violet.Package {
                     meeting: "note.project.notes.meeting",
                 };
                 let project = customJS.Projects?.getProjectByFile(
-                    state.previousFile
+                    state.prevFile
                 );
 
                 if (project) {
                     await customJS.Obsidian.vault.createFolder(project.notePath);
 
-                    return (moment(state.targetFile.basename,
+                    return (moment(state.file.basename,
                             "[meeting.]YYYY-MM-DD",
                             true
                         ).isValid())? templates.meeting : templates.notes;
@@ -372,7 +376,7 @@ class Templater extends customJS.Violet.Package {
              * created through link clicks and creating new note from template
              */
             (state) => {
-                if (customJS.Obsidian.file.getTags(state.previousFile)
+                if (customJS.Obsidian.file.getTags(state.prevFile)
                     ?.includes("#zettel/permanent")
                 ) {
                     return "note.permanent";
@@ -383,15 +387,13 @@ class Templater extends customJS.Violet.Package {
              * Default template
              * When none of the above fits, usually trggered by Ctrl + N
              */
-            async (state) => {
-                return "note.default";
-            }
+            async (state) => "note.default",
         ];
 
         // Go through every resolver, stops when a resolver succeeds
         for (const resolver of resolvers) {
             let template = await resolver(state);
-            if (template) { return template; }
+            if (template) return template;
         }
     }
     
@@ -440,7 +442,7 @@ class Templater extends customJS.Violet.Package {
      * @param {string} filePath - Path of file to apply template upon
      * @param {string|TFile} template - TFile or basename of the template
      */
-    async apply(filePath, template) {
+    async AppendFileWithTemplate(filePath, template) {
         if (!(template instanceof obsidian.TFile)) {
             template = this.getFile(template);
         }
@@ -451,48 +453,6 @@ class Templater extends customJS.Violet.Package {
             template,
             targetTFile
         );
-    }
-
-    /**
-     * Checks if a note can be updated
-     * @param {TFile} file - Target note to be updated
-     * @returns {String} status of updater availability
-     */
-    async tryUpdate(file) {
-        const {name, version} = customJS.Script.template.getInfo(file);
-
-        // No template assigned
-        if (!name) {
-            return "missing-template";
-        }
-
-        // Missing version number
-        if (!version) {
-            return "missing-version";
-        }
-
-        // Note version is latest or next
-        if (version == "next" ||
-            version >= await this.getInfo(name).getVersion()) {
-            return "latest";
-        }
-
-        // Template updater doesn't exist
-        const updateTemplate = `${name}.update.${version}`;
-        if (!this.exists(updateTemplate)) {
-            return "missing-updater";
-        }
-
-        return "update-available";
-    }
-
-    /**
-     * Update a note layout to match latest template design
-     * @param {TFile} file - Target note to update
-     * @todo tryUpdate() should run within update()
-     */
-    async update(file) {
-        await this.apply(file.path, "system.update");
     }
 
     /**

@@ -1,0 +1,24 @@
+{
+    "template": {
+        "type": "frontmatter",
+        "key": "template/name"
+    },
+    "templateVersion": {
+        "type": "frontmatter",
+        "key": "template/version"
+    },
+    "friend": {
+        "violet-core": {
+            "customjs": {
+                "folders": [
+                    "customjs"
+                ]
+            }
+        },
+        "violet-datacore": {
+            "folders": [
+                "datacore"
+            ]
+        }
+    }
+}

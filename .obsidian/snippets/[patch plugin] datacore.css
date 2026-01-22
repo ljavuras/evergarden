@@ -5,17 +5,19 @@
  * @author Ljavuras <ljavuras.py@gmail.com>
  */
 
-div[class^=block-language-datacore] div:has(> table.datacore-table) {
+div:has(> table.datacore-table) {
     --table-header-background: var(--datacore-table-background-color);
     --table-column-alt-background: var(--datacore-table-background-color);
     --table-background: var(--datacore-table-background-color);
     --table-row-alt-background: var(--datacore-table-background-color);
+    --table-row-alt-background-hover: var(--datacore-table-background-color);
 
-    --datacore-table-background-color: transparent;
+    --datacore-table-background-color: var(--background-primary);
     --datacore-table-border-width: 1px;
     --datacore-table-border-color: var(--background-modifier-border);
     --datacore-table-border-radius: var(--radius-s);
     --datacore-table-row-height: 30px;
+    --datacore-table-group-header-background-color: var(--background-primary-alt);
     --datacore-table-header-background-hover: var(--background-modifier-hover);
     --datacore-table-row-background-hover: var(--bases-table-row-background-hover);
     
@@ -36,14 +38,20 @@ table.datacore-table thead tr th {
     border: none;
 }
 
-/* Grid borders */
+/* Remove column stripe */
+table.datacore-table tbody tr > td:nth-child(2n+2) {
+    background-color: unset;
+}
+
+/* Grid borders (vertical) */
 table.datacore-table th:not(:last-child),
 table.datacore-table td:not(:last-child) {
-    box-shadow: inset calc(-1 * var(--datacore-table-border-width)) 0 0 var(--datacore-table-border-color);
+    border-right: var(--datacore-table-border-width) solid var(--datacore-table-border-color);
 }
+/* Grid borders (horizontal) */
 table.datacore-table thead tr,
 table.datacore-table tr:not(:last-child) {
-    box-shadow: inset 0 calc(-1 * var(--datacore-table-border-width)) 0 var(--datacore-table-border-color);
+    border-bottom: var(--datacore-table-border-width) solid var(--datacore-table-border-color);
 }
 
 /* Muted smaller font within table */
@@ -64,12 +72,22 @@ table.datacore-table thead th:hover {
     background-color: var(--datacore-table-header-background-hover);
 }
 
-table.datacore-table tbody tr:hover {
-    background-color: var(--datacore-table-row-background-hover) !important;
+/* Table row hover highlight removed */
+table.datacore-table .datacore-table-row:hover {
+    background-color: unset !important;
 }
 
 /* Vertiaclly center align title elements */
 table.datacore-table .datacore-table-header-title {
     display: flex;
     gap: var(--size-4-1);
+}
+
+/* Group header */
+table.datacore-table tr.datacore-table-group-header {
+    background: var(--datacore-table-group-header-background-color);
+}
+/* Group header hover style remove */
+table.datacore-table .datacore-table-group-header:hover {
+    background-color: var(--datacore-table-group-header-background-color) !important;
 }

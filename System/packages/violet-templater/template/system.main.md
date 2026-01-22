@@ -12,7 +12,7 @@ const { Templater } = await cJS();
 tp = Templater.wrap(tp);
 
 // Include template for target file
-let target_template = await Templater.resolveTemplate(tp.config);
+let target_template = await Templater.resolveTemplate(tp.config.target_file);
 if (target_template) {
     tR += await tp.include(`[[${target_template}]]`);
 }
