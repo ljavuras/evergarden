@@ -2,6 +2,7 @@
     "folders": [
         "template"
     ],
+    "overrideTemplaterOnCreate": true,
     "friend": {
         "violet-core": {
             "customjs": {
