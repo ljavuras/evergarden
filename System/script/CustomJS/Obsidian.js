@@ -233,8 +233,8 @@ class Obsidian {
          * @returns {TFile}
          */
         getPreviousFile() {
-            return app.vault.getAbstractFileByPath(
-                app.workspace.getLastOpenFiles()[0]
+            return app.vault.getFileByPath(
+                app.workspace.getLastOpenFiles()[1]
             );
         },
 
@@ -452,7 +452,7 @@ class Obsidian {
                 }
             });
     }
-
+    
     /**
      * @todo Support markdown link & external link
      */
