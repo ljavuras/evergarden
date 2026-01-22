@@ -1,0 +1,21 @@
+/**
+ * @author Ljavuras <ljavuras.py@gmail.com>
+ */
+
+.evergarden.pill {
+    background: var(--evergarden-pill-background);
+    border: var(--evergarden-pill-border);
+    border-radius: var(--evergarden-pill-border-radius);
+    font-size: var(--evergarden-pill-font-size);
+    color: var(--evergarden-pill-color);
+    text-decoration: var(--evergarden-pill-text-decoration);
+    padding: var(--evergarden-pill-padding);
+    transition: var(--evergarden-pill-transition);
+
+    &.interactive:hover {
+        background: var(--evergarden-pill-background-hover);
+        border: var(--evergarden-pill-border-hover);
+        color: var(--evergarden-pill-color-hover);
+        text-decoration: var(--evergarden-pill-text-decoration-hover);
+    }
+}

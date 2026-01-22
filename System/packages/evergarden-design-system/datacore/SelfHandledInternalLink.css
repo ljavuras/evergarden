@@ -1,0 +1,4 @@
+body {
+    /* Lay hover preview on top of modal */
+    --layer-popover: 55;
+}

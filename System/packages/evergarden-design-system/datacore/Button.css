@@ -1,0 +1,11 @@
+/**
+ * @author Ljavuras <ljavuras.py@gmail.com>
+ */
+
+button.evergarden {
+    cursor: pointer;
+
+    &:disabled {
+        cursor: not-allowed;
+    }
+}
