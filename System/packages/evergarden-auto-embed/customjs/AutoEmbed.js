@@ -114,7 +114,15 @@ class AutoEmbed extends customJS.Violet.Package {
         super();
 
         // `require()` provided by plugin CodeScript Toolkit
-        const { StateEffect } = require("@codemirror/state");
+        try {
+            var { StateEffect } = require("@codemirror/state");
+        } catch (e) {
+            console.error(e);
+            throw new Error(
+                "[Package] evergarden-auto-embed:\n" +
+                "Make sure you have plugin CodeScript Toolkit install and enabled."
+            );
+        }
 
         // Dispatch this effect when this._embed updates
         this.autoEmbedUpdateEffect = StateEffect.define();
@@ -138,7 +146,15 @@ class AutoEmbed extends customJS.Violet.Package {
             this.embedMarkdownView(leaf.view);
         });
 
-        const { around } = await requireAsync("monkey-around");  // Use async for mobile support
+        try {
+            var { around } = await requireAsync("monkey-around");  // Use async for mobile support
+        } catch (e) {
+            console.error(e);
+            throw new Error(
+                "[Package] evergarden-auto-embed:\n" +
+                "Make sure you have plugin CodeScript Toolkit install and enabled."
+            );
+        }
 
         /**
          * Embeds within reading mode header / footer
@@ -235,9 +251,17 @@ class AutoEmbed extends customJS.Violet.Package {
      */
     registerEmbedCMExtension() {
         // `require()` provided by plugin CodeScript Toolkit
-        const { Decoration, WidgetType, EditorView } = require("@codemirror/view");
-        const { StateField, RangeSetBuilder } = require("@codemirror/state");
-        const { syntaxTree } = require("@codemirror/language");
+        try {
+            var { Decoration, WidgetType, EditorView } = require("@codemirror/view");
+            var { StateField, RangeSetBuilder } = require("@codemirror/state");
+            var { syntaxTree } = require("@codemirror/language");
+        } catch (e) {
+            console.error(e);
+            throw new Error(
+                "[Package] evergarden-auto-embed:\n" +
+                "Make sure you have plugin CodeScript Toolkit install and enabled."
+            );
+        }
 
         class AutoEmbedWidget extends WidgetType {
             constructor(embedSpec, markdownView) {
