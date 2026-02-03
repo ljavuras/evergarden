@@ -5,7 +5,7 @@
 class Violet extends obsidian.Component {
     app = customJS.app;
 
-    /** Package infos: package.json, settings.json, path */
+    /** Package infos: manifest.json, settings.json, path */
     packages = {};
 
     /**
@@ -46,7 +46,7 @@ class Violet extends obsidian.Component {
     }
 
     getPackageNameById(id) {
-        return this.packages[id]?.pkg.name;
+        return this.packages[id]?.manifest.name;
     }
 
     constructor() {
@@ -165,7 +165,7 @@ class Violet extends obsidian.Component {
 
     /**
      * Load settings of only this package
-     * @returns {object}
+     * @returns {Promise}
      */
     async loadPackagesPath() {
         // Find violet-core/settings.json
@@ -182,7 +182,9 @@ class Violet extends obsidian.Component {
 
         this.config.packagesPath = JSON.parse(
             await app.vault.cachedRead(settingsFile)
-        ).packagesPath;
+        )
+        .packagesPath
+        .replace(/\/$/, "");  // Remove following "/" if exist
 
         if (!this.config.packagesPath) {
             throw new Error(
@@ -204,23 +206,26 @@ class Violet extends obsidian.Component {
     async mountCJSInstances() {
         // Spawn CustomJS instances
         for (const [className, { id, file }] of Object.entries(this.config.customjs.mapping)) {
+            let instance;
 
             // Skip `evalFile()` for self
             if (this.packageId === id
-            && this.constructor.name === className) {
-                continue;
+                && this.constructor.name === className
+            ) {
+                instance = this;
+            } else {
+                // CustomJS creates class instance
+                await this.app.plugins.getPlugin('customjs').evalFile(file.path);
+
+                // Get instance from CustomJS
+                instance = customJS[className];
+                if (!instance) return;
             }
-
-            // CustomJS creates class instance
-            await this.app.plugins.getPlugin('customjs').evalFile(file.path);
-
-            // Get instance from CustomJS
-            let instance = customJS[className];
-            if (!instance) return;
 
             // Store class instance to each package profile: Violet.packages[id].customJS
             this.packages[id].customjs ??= {};
             this.packages[id].customjs[className] = instance;
+            instance.manifest = this.packages[id].manifest;
 
             // Mount class instancs as Violet component child
             this.addChild(instance);
@@ -234,13 +239,13 @@ class Violet extends obsidian.Component {
      * info are supplied by this package.
      */
     async loadAllPackages() {
-        // Parse all settings.json & package.json under package path
+        // Parse all settings.json & manifest.json under package path
         const packageConfigFiles = app.vault.getFiles()
         .filter(
             // Get all config files under package path
-            (tfile) => tfile.path.startsWith(this.config.packagesPath)
+            (tfile) => tfile.path.startsWith(this.config.packagesPath + "/")
                 && (tfile.path.endsWith("/settings.json")
-                || tfile.path.endsWith("/package.json"))
+                || tfile.path.endsWith("/manifest.json"))
         )
 
         await Promise.all(packageConfigFiles.map(async (configFile) => {
@@ -257,25 +262,22 @@ class Violet extends obsidian.Component {
 
     async parsePackageConfigs(configFile) {
         // Assumes package folder == package id
-        const packageId = configFile.parent.path.slice(this.config.packagesPath.length);
+        const packageId = configFile.parent.path
+            .slice(this.config.packagesPath.length + 1);
         const configContent = JSON.parse(
             await app.vault.cachedRead(configFile)
         );
+        this.packages[packageId] ??= {};
+        // Workaround for CustomJS not enabling classes to get script info
+        this.packages[packageId].path = configFile?.parent?.path;
 
-        if (!this.packages[packageId]) {
-            this.packages[packageId] = {};
-        }
-
-        if (configFile.basename == "settings") {
+        if (configFile.basename === "settings") {
             this.packages[packageId].settings = (
                 new this.Settings(packageId)
             ).set(configContent);
-        } else if (configFile.basename == "package") {
-            this.packages[packageId].pkg = configContent;
+        } else if (configFile.basename === "manifest") {
+            this.packages[packageId].manifest = configContent;
         }
-
-        // Workaround for CustomJS not enabling classes to get script info
-        this.packages[packageId].path = configFile?.parent?.path;
     }
 
     registerOnReady(packageId, className, callback) {
@@ -505,7 +507,7 @@ class Violet extends obsidian.Component {
         Violet = customJS.Violet;
 
         get packageId() {
-            return this.Violet.getPackageByInstance(this);
+            return this.manifest.id;
         }
 
         get path() {
@@ -530,11 +532,6 @@ class Violet extends obsidian.Component {
             return this.Violet.packages[id];
         }
 
-        loadPkg(force = false) {
-            if (!force && this.pkg) { return this.pkg; }
-            this.pkg = this.Violet.packages[this.packageId].pkg;
-            return this.pkg;
-        }
 
         loadSettings() {
             return window.VPS.packages[this.packageId].settings;
@@ -565,15 +562,15 @@ class Violet extends obsidian.Component {
          * @param {function} command.callback
          */
         addCommand(command) {
-            let pkg = this.loadPkg();
-            if (!pkg.id || !pkg.name) {
-                throw new Error("Cannot add command, package.json is incomplete.");
+            let { manifest } = this;
+            if (!manifest.id || !manifest.name) {
+                throw new Error("Cannot add command, manifest.json is incomplete.");
             }
             if (!command.id || !command.name) {
                 throw new Error("Cannot add command, bad command arguments.")
             }
-            command.id = `violet:${pkg.id}:${command.id}`;
-            command.name = `[Package] ${pkg.name}: ${command.name}`;
+            command.id = `violet:${manifest.id}:${command.id}`;
+            command.name = `[Package] ${manifest.name}: ${command.name}`;
             customJS.app.commands.addCommand(command);
             this.register(() => 
                 customJS.app.commands.removeCommand(command.id)
