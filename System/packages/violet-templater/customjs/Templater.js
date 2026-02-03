@@ -82,6 +82,7 @@ class Templater extends customJS.Violet.Package {
             }
         );
 
+        // Plugin Templater settings
         if (this.config.plugin.folder) {
             this.config.folders.push({
                 pluginId: "templater-obsidian",
@@ -90,6 +91,7 @@ class Templater extends customJS.Violet.Package {
         }
 
         for (const [id, setting] of Object.entries(this.settings.all)) {
+            // Package template files
             this.config.files = this.config.files.concat(
                 setting.files?.map(path => ({
                     packageId: id, 
@@ -97,6 +99,7 @@ class Templater extends customJS.Violet.Package {
                 })) ?? []
             );
 
+            // Package template folders
             this.config.folders = this.config.folders.concat(
                 setting.folders?.map(path => ({
                     packageId: id,
@@ -126,7 +129,7 @@ class Templater extends customJS.Violet.Package {
                 
                 this.plugin.event_handler.update_trigger_file_on_creation();
             }
-        })
+        });
 
         // Register our own onCreate handler
         // https://github.com/SilentVoid13/Templater/blob/80a4b3d6d2c0321ab9243a82974d624e121a3fb5/src/core/Templater.ts#L519
@@ -166,7 +169,7 @@ class Templater extends customJS.Violet.Package {
 
             const template = this.getFile(await this.resolveTemplate(file));
             await this.plugin.templater.write_template_to_file(template, file);
-        }))
+        }));
     }
 
     _watchTemplateUpdate() {
@@ -313,6 +316,7 @@ class Templater extends customJS.Violet.Package {
             },
 
             /**
+             * [Package] Area (evergarden-area)
              * Area
              * File name starts with `a-`
              */
@@ -323,6 +327,7 @@ class Templater extends customJS.Violet.Package {
             },
 
             /**
+             * [Package] Library (evergarden-library)
              * Book series
              * File name ends with ` (Series)`
              */
@@ -333,8 +338,9 @@ class Templater extends customJS.Violet.Package {
             },
 
             /**
+             * [Package] Periodic (evergarden-periodic)
              * Periodic Notes
-             * File name with periodic formats, checkout `customJS.Periodic`
+             * File name with periodic formats, checkout `Periodic.js`
              */
             (state) => {
                 let periodicType = customJS.Periodic?.getType(
@@ -347,6 +353,7 @@ class Templater extends customJS.Violet.Package {
             },
 
             /**
+             * [Package] Project (evergarden-project)
              * Project Notes
              * Active note belongs to a project during the creation of new note,
              * usually triggered through link clicks in project notes
@@ -371,6 +378,7 @@ class Templater extends customJS.Violet.Package {
             },
 
             /**
+             * [Package] Zettelkasten (evergarden-zettel)
              * Permanent Notes
              * Active file is permanent note during the creation of new note,
              * created through link clicks and creating new note from template

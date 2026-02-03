@@ -4,6 +4,7 @@
 
 class Violet extends obsidian.Component {
     app = customJS.app;
+    VPS = this;
 
     /** Package infos: manifest.json, settings.json, path */
     packages = {};
@@ -378,7 +379,7 @@ class Violet extends obsidian.Component {
                 this.trigger("update", this.#packageId, selfUpdate);
             }
             for (const packageId of Object.keys(update.friend ?? {})) {
-                VPS.packages[packageId].settings
+                this.VPS.packages[packageId].settings
                     .trigger("update", this.#packageId, update.friend[packageId]);
             }
         }
@@ -483,7 +484,7 @@ class Violet extends obsidian.Component {
          */
         get all() {
             const all = {};
-            for (const [friendId, pkg] of Object.entries(window.VPS.packages)) {
+            for (const [friendId, pkg] of Object.entries(this.VPS.packages)) {
                 const friendSetting = pkg.settings?.friend(this.#packageId);
                 if (friendSetting) all[friendId] = friendSetting;
             }
@@ -504,21 +505,21 @@ class Violet extends obsidian.Component {
 
     Package = class Package extends obsidian.Component {
         app = customJS.app;
-        Violet = customJS.Violet;
+        VPS = customJS.Violet;
 
         get packageId() {
             return this.manifest.id;
         }
 
         get path() {
-            return this.Violet.packages[this.packageId].path;
+            return this.VPS.packages[this.packageId].path;
         }
 
         /** Override load to call queued onReady callbacks */
         async load() {
             await super.load();
             const asyncFns = [];
-            this.Violet._onReady[`${this.packageId}:${this.constructor.name}`]
+            this.VPS._onReady[`${this.packageId}:${this.constructor.name}`]
             ?.forEach((callback) => {
                 const promise = callback(this);
                 if (promise) { asyncFns.push(promise); }
@@ -529,12 +530,11 @@ class Violet extends obsidian.Component {
         }
 
         getPackage(id) {
-            return this.Violet.packages[id];
+            return this.VPS.packages[id];
         }
 
-
         loadSettings() {
-            return window.VPS.packages[this.packageId].settings;
+            return this.VPS.packages[this.packageId].settings;
         }
 
         async saveSettings() {
@@ -546,9 +546,9 @@ class Violet extends obsidian.Component {
         }
 
         onPackageReady(packageId, className, callback) {
-            this.Violet.registerOnReady(packageId, className, callback);
+            this.VPS.registerOnReady(packageId, className, callback);
             this.register(() => {
-                this.Violet.unregisterOnReady(packageId, className, callback);
+                this.VPS.unregisterOnReady(packageId, className, callback);
             });
         }
 

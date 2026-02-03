@@ -259,7 +259,7 @@ class Datacore extends customJS.Violet.Package {
                 // Convert Link to string
                 // https://github.com/blacksmithgu/datacore/blob/31a8b18b0978f8b06d03d6dabcf023a7362b56f2/src/api/script-cache.ts#L127
                 : (pathOrPackage.obsidianLink? pathOrPackage.obsidianLink() : pathOrPackage);
-            const pkg = Object.values(this.violetDatacore.Violet.packages)
+            const pkg = Object.values(this.violetDatacore.VPS.packages)
                 .filter((pkg) => scriptPath.startsWith(pkg.path))
                 .reduce((pkg, currentPkg) => {
                     if (currentPkg.path.length > pkg.path.length)
@@ -311,7 +311,7 @@ class Datacore extends customJS.Violet.Package {
             }
 
             const scriptPath = this.scriptPath(Component);
-            const pkg = Object.values(this.violetDatacore.Violet.packages)
+            const pkg = Object.values(this.violetDatacore.VPS.packages)
                 .filter((pkg) => scriptPath.startsWith(pkg.path))
                 .reduce((pkg, currentPkg) => {
                     if (currentPkg.path.length > pkg.path.length)
