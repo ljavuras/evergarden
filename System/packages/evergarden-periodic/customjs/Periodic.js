@@ -68,9 +68,10 @@ class Periodic extends customJS.Violet.Package {
     ]
 
     onload() {
-        this.commands.forEach(cmd => this.addCommand(cmd));
-
+        this.loadSettings()
         this.buildConfig();
+        
+        this.commands.forEach(cmd => this.addCommand(cmd));
         this.yearly    = new this.PeriodicType(this, "year");
         this.quarterly = new this.PeriodicType(this, "quarter");
         this.monthly   = new this.PeriodicType(this, "month");
@@ -107,7 +108,7 @@ class Periodic extends customJS.Violet.Package {
     buildConfig() {
         this.config = Object.assign(
             this.DEFAULT_CONFIG,
-            this.loadSettings().get()
+            this.settings
         );
     }
     

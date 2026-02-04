@@ -39,9 +39,9 @@ class Templater extends customJS.Violet.Package {
     };
 
     onload() {
-        this.settings = this.loadSettings();
-        this.buildConfig();
-        this.registerOnCreate();
+        this.loadSettings();
+        this._buildConfig();
+        this._registerOnCreate();
         this.commands.forEach(cmd => this.addCommand(cmd));
         this.getTemplates(true);
         this._watchTemplateUpdate();
@@ -70,8 +70,8 @@ class Templater extends customJS.Violet.Package {
         },
     ]
 
-    buildConfig() {
-        const settings = this.settings.get();
+    _buildConfig() {
+        const settings = this.settings;
 
         Object.assign(
             this.config,
@@ -112,7 +112,7 @@ class Templater extends customJS.Violet.Package {
         }
     }
 
-    registerOnCreate() {
+    _registerOnCreate() {
         if (!this.config.overrideTemplaterOnCreate) return;
 
         // Disable Templater's onCreate handler
@@ -224,7 +224,7 @@ class Templater extends customJS.Violet.Package {
         );
         let inFolderTemplates = this.config.folders
         .map((t) => 
-                    customJS.Obsidian.vault
+            customJS.Obsidian.vault
             .getFilesFromFolder(t.path)
             .map(file => ({
                 source: t.source,

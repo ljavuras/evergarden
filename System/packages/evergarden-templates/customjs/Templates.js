@@ -4,12 +4,12 @@
 
 class Templates extends VPS.Package {
     getFrontmatterKey(setting) {
-        return this.config[setting]?.key;
+        return this.config.frontmatter[setting];
     }
 
     onload() {
-        this.settings = this.loadSettings();
-        this.config = this.settings.get();
+        this.loadSettings();
+        this.config = this.settings;
         this.registerEvent(this.settings.on("update", (packageId, update) => {
             if (packageId === this.packageId)
                 Object.assign(this.config, update);
@@ -154,6 +154,7 @@ class Templates extends VPS.Package {
             return;
         }
 
+        // https://github.com/SilentVoid13/Templater/blob/80a4b3d6d2c0321ab9243a82974d624e121a3fb5/src/core/Templater.ts#L396-L420
         const { templater } = this.Templater.plugin;
         templater.start_templater_task(file.path);
         // Execute parser, store parsed content in `tp`

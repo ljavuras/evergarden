@@ -48,6 +48,7 @@ class Datacore extends customJS.Violet.Package {
             );
         }
 
+        this.loadSettings();
         this.buildConfig();
         this._ready = true;
     }
@@ -59,11 +60,10 @@ class Datacore extends customJS.Violet.Package {
     }
 
     buildConfig() {
-        const settings = this.loadSettings();
         this.config = { files: [], folders: [], scripts: {} };
 
         // Aggregate settings from all packages
-        for (const [id, setting] of Object.entries(settings.all)) {
+        for (const [id, setting] of Object.entries(this.settings.all)) {
             this.config.files = this.config.files.concat(
                 setting.files?.map(path => ({
                     packageId: id,
@@ -285,12 +285,12 @@ class Datacore extends customJS.Violet.Package {
                     // Function Component
                     if (c === c.toUpperCase()) {
                         return ({[obj.name]: ({ ...props }) =>
-                        h(Wrapper, {
-                            pkg: pkg,
+                            h(Wrapper, {
+                                pkg: pkg,
                                 component: obj,
-                            scriptPath: scriptPath,
-                            ...props
-                        })
+                                scriptPath: scriptPath,
+                                ...props
+                            })
                         })[obj.name];  // Return a named function
                     }
                     // Regular function

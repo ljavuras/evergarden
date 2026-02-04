@@ -8,10 +8,6 @@ class Violet extends obsidian.Component {
 
     /** Package infos: manifest.json, settings.json, path */
     packages = {};
-
-    /**
-     * @type {Violet.Settings}
-     */
     settings;
 
     /** Determines package behavior, parsed from settings */
@@ -92,7 +88,7 @@ class Violet extends obsidian.Component {
     async initViolet() {
         await this.loadPackagesPath();
         await this.loadAllPackages();
-        this.settings = this.loadSettings();
+        this.loadSettings();
         this.buildConfig();
         await this.mountCJSInstances();
         this.load();  // Load all child components (packages)
@@ -100,7 +96,7 @@ class Violet extends obsidian.Component {
 
     buildConfig() {
         this.config = {
-            packagesPath: this.settings.get()?.packagesPath,
+            packagesPath: this.settings.packagesPath,
             customjs: { scripts: [], mapping: {} }
         };
 
@@ -194,11 +190,12 @@ class Violet extends obsidian.Component {
         }
     }
 
-    /**
-     * @returns {this.Settings}
-     */
     loadSettings() {
-        return this.packages[this.packageId].settings;
+        this.Package.prototype.loadSettings.call(this);
+    }
+
+    saveSettings() {
+        this.Package.prototype.saveSettings.call(this);
     }
 
     /**
@@ -253,10 +250,13 @@ class Violet extends obsidian.Component {
                 await this.parsePackageConfigs(configFile);
             })
         );
-    
+
+        // Create settings object for package without `settings.json`
         for (const packageId of Object.keys(this.packages)) {
             if (!this.packages[packageId].settings) {
-                this.packages[packageId].settings = new this.Settings(packageId);
+                this.packages[packageId].settings = new this.Settings(
+                    this.app, this, packageId
+                );
             }
         }
     }
@@ -274,8 +274,8 @@ class Violet extends obsidian.Component {
 
         if (configFile.basename === "settings") {
             this.packages[packageId].settings = (
-                new this.Settings(packageId)
-            ).set(configContent);
+                new this.Settings(this.app, this, packageId)
+            ).set(configContent, false);
         } else if (configFile.basename === "manifest") {
             this.packages[packageId].manifest = configContent;
         }
@@ -307,22 +307,61 @@ class Violet extends obsidian.Component {
      * Fires update event when updated by either itself or a friendly package.
      */
     Settings = class Settings extends obsidian.Events {
+        app;
+        VPS;
+        path;
+        packageId;
         #settings = {};
-        #packageId;
 
-        constructor(packageId) {
+        constructor(app, VPS, packageId) {
             super();
-            this.#packageId = packageId;
+            this.app = app;
+            this.VPS = VPS;
+            this.path = VPS.packages[packageId].path + "/settings.json";
+            this.packageId = packageId;
         }
 
         /**
          * Returns an object that represents the setting this package owns, not
          * including settings other packages contributes to this package.
-         * Modification on this object **does not** update a package's settings.
+         * Modification on the returned object **does not** update a package's
+         * settings.
          * @returns {any} Current setting.
          */
         get() {
-            return structuredClone(this.#settings);
+            const settings = structuredClone(this.#settings);
+            Object.defineProperties(settings, {
+                all: {
+                    get: () => this.all(),
+                },
+                on: {
+                    value: (...args) => this.on(...args)
+                }
+            });
+            return settings;
+        }
+
+        /**
+         * Set current settings while optionally triggering update events on
+         * itself and friend settings.
+         * @param {Object} settings - The new setting.
+         * @param {boolean} trigger - Fire events to affected packages if true.
+         * @returns {Violet.Settings}
+         */
+        set(settings = {}, trigger = true) {
+            if (trigger)
+                var update = this._diff(settings);
+            this.#settings = structuredClone(settings);
+            if (trigger) this._triggerUpdate(update);
+            return this;
+        }
+
+        async save(settings) {
+            this.set(settings);
+            await this.app.vault.adapter.write(
+                this.path,
+                JSON.stringify(this.#settings, null, 4)
+            );
         }
 
         /**
@@ -333,7 +372,7 @@ class Violet extends obsidian.Component {
          * @param {Object} oldObj - Original object
          * @returns {Object}
          */
-        diff(newObj, oldObj = this.#settings) {
+        _diff(newObj, oldObj = this.#settings) {
             const isObject = (o) =>
                 o != null && typeof o === "object";
             const isEmptyObject = (o) =>
@@ -359,7 +398,7 @@ class Violet extends obsidian.Component {
                     return acc;
                 }
 
-                const difference = this.diff(newObj[key], oldObj[key]);
+                const difference = this._diff(newObj[key], oldObj[key]);
 
                 if (isEmptyObject(difference) && !(difference instanceof Date)
                     && (isEmptyObject(oldObj[key]) || !isEmptyObject(newObj[key]))
@@ -369,19 +408,6 @@ class Violet extends obsidian.Component {
                 acc[key] = difference;
                 return acc;
             }, deletedValues);
-        } 
-
-        _triggerUpdate(update) {
-            // Trigger settings update events for affected packages
-            const selfUpdate = update;
-            delete selfUpdate.friend;
-            if (Object.keys(update).some(key => key !== "friend")) {
-                this.trigger("update", this.#packageId, selfUpdate);
-            }
-            for (const packageId of Object.keys(update.friend ?? {})) {
-                this.VPS.packages[packageId].settings
-                    .trigger("update", this.#packageId, update.friend[packageId]);
-            }
         }
 
         /**
@@ -400,81 +426,21 @@ class Violet extends obsidian.Component {
          * @return {EventRef}
          */
 
-        /**
-         * Set its settings without triggering update events on itself and
-         * friend settings.
-         * @param {Object} settings - The new setting.
-         * @param {boolean} trigger - Fire events to affected packages if true.
-         * @returns {Violet.Settings} Returns itself, allows chaining
-         */
-        set(settings, trigger = false) {
-            if (trigger)
-                var update = this.diff(settings);
-            this.#settings = structuredClone(settings) ?? {};
-            if (trigger) this._triggerUpdate(update);
-            return this;
-        }
-
-        /**
-         * Assigns one or more partial setting objects to this settings, similar
-         * to `Object.assign()`.
-         * 
-         * Differences from `Object.assign()`:
-         * - Triggers a update event on itself after assignment.
-         * - Keys with `undefined` value are removed.
-         * - Updates to friend settings triggers update events on corresponding
-         *   settings objects.
-         * @param  {...Object} patches - Part of the settings that are to be
-         * updated.
-         * @returns {Violet.Settings} Returns itself to allow chaining.
-         */
-        assign(...patches) {
-            const update = Object.assign(...patches);
-            Object.assign(this.#settings, update);
-            
-            // Delete keys with value === undefined
-            const pruneUndefined = (setting) => {
-                const prunedSetting = {};
-                Object.keys(setting).forEach((key) => {
-                    if (setting[key] === Object(setting[key]))
-                        prunedSetting[key] = pruneUndefined(setting[key]);
-                    else if (setting[key] !== undefined)
-                        prunedSetting[key] = setting[key];
-                })
-                return prunedSetting;
+        _triggerUpdate(update) {
+            // Trigger settings update events for affected packages
+            const selfUpdate = structuredClone(update);
+            delete selfUpdate.friend;
+            if (Object.keys(update).some(key => key !== "friend")) {
+                this.trigger("update", this.packageId, selfUpdate);
             }
-            this.#settings = pruneUndefined(this.#settings);
-            this._triggerUpdate(update);
-            return this;
-        }
-
-        /**
-         * Similar to {@link Violet.Settings#assign}, but doesn't accept
-         * `undefined` value.
-         * Use this method if you do not wish to accidentally delete keys from
-         * settings.
-         * @param  {...any} patches - Part of the settings that are to be
-         * updated
-         * @returns {Violet.Settings} Returns itself to allow chaining.
-         */
-        patch(...patches) {
-            const update = Object.assign(...patches)
-            const validatePatch = (patch) => {
-                Object.keys(patch).forEach((key) => {
-                    if (patch[key] === undefined) {
-                        throw new Error(
-                            `Settings.patch(): attempting to update settings with undefined value on key ${key}. `
-                            + `Use Settings.assign() to delete keys by assigning undefined, or provide a valid value.`
-                        );
-                    }
-                    if (patch[key] === Object(patch[key]))
-                        validatePatch(patch[key]);
-                });
+            for (const packageId of Object.keys(update.friend ?? {})) {
+                this.VPS.packages[packageId].settings
+                    .trigger(
+                        "update",
+                        this.packageId,
+                        structuredClone(update.friend[packageId])
+                    );
             }
-            patches.forEach(patch => validatePatch(patch));
-            this.assign(this.#settings, update);
-            this._triggerUpdate(update);
-            return this;
         }
 
         /**
@@ -482,10 +448,10 @@ class Violet extends obsidian.Component {
          * itself.
          * @type {Object}
          */
-        get all() {
+        all() {
             const all = {};
             for (const [friendId, pkg] of Object.entries(this.VPS.packages)) {
-                const friendSetting = pkg.settings?.friend(this.#packageId);
+                const friendSetting = pkg.settings?.friend(this.packageId);
                 if (friendSetting) all[friendId] = friendSetting;
             }
             return all;
@@ -498,7 +464,7 @@ class Violet extends obsidian.Component {
          * @returns {Object | undefined}
          */
         friend(friendId) {
-            if (friendId === this.#packageId) return this.get();
+            if (friendId === this.packageId) return this.get();
             return structuredClone(this.#settings.friend?.[friendId]);
         }
     }
@@ -534,15 +500,11 @@ class Violet extends obsidian.Component {
         }
 
         loadSettings() {
-            return this.VPS.packages[this.packageId].settings;
+            this.settings = this.VPS.packages[this.packageId].settings.get();
         }
 
-        async saveSettings() {
-            const { all, ...settings } = this.settings;
-            await this.app.vault.adapter.write(
-                `${this.path}/settings.json`,
-                JSON.stringify(settings, null, 4)
-            );
+        async saveSettings(settings) {
+            await this.VPS.packages[this.packageId].settings.save(settings);
         }
 
         onPackageReady(packageId, className, callback) {
