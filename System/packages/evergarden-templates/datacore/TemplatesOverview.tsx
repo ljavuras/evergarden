@@ -148,6 +148,7 @@ function useTemplateInfo() {
                 templateInfo.excerpt = await script.getExcerpt();
 
                 // Get notes, updatable notes, and outdated notes
+                templateInfo.existingVersions = new Set();
                 templateInfo.updatableVersions = new Set();
                 templateInfo.notes = notes.filter(
                     note => note.field(FM_TEMPLATE_NAME).value.path === templateInfo.file.path
@@ -159,6 +160,7 @@ function useTemplateInfo() {
                     async (note: _MarkdownPage) => {
                         const file = app.vault.getFileByPath(note.$path);
                         const version = note.field(FM_TEMPLATE_VERSION).value;
+                        templateInfo.existingVersions.add(version);
                         if (version >= templateInfo.version) {
                             templateInfo.notes.latest.add(note);
                         }
@@ -228,7 +230,15 @@ function TemplatesOverview() {
 
     return (
         <div className="evergarden templates">
-            <h1>Templates</h1>
+            <div className="header">
+                <div className="title">Templates</div>
+                <ClickableIcon
+                    className="settings"
+                    icon="settings"
+                    onClick={() => Templates.openSettings()}
+                    label="Settings"
+                />
+            </div>
             <dc.Table
                 rows={ROWS}
                 columns={COLUMNS}
@@ -351,6 +361,130 @@ function TemplateProgress(
     )
 }
 
+function OpenTemplateButton({ templateInfo }) {
+    return (
+        <Button
+            className="open-template"
+            onClick={() => {
+                switch (Templates.getOpenTemplateApp()) {
+                    case "vscode":
+                        window.open(
+                            `vscode://file/${
+                                app.vault.adapter.getBasePath()
+                            }/${
+                                templateInfo.file.path
+                            }`
+                        );
+                        break;
+                    case "obsidian":
+                        app.workspace.openLinkText(
+                            templateInfo.file.path,
+                            "",
+                            true
+                        );
+                        break;
+                }
+            }}
+        >
+            Open template
+        </Button>
+    )
+}
+
+class ViewUpdatersModal extends obsidian.Modal {
+    constructor(templateInfo) {
+        super(app);
+        // this.setTitle("Template updaters");
+        this.modalEl.addClass("mod-form");
+
+        const getUpdaters = (type) => {
+            const updaterSet = type === "parse"
+                ? Templates.getParsers()
+                : type === "compose"
+                    ? Templates.getComposers()
+                    : null;
+            if (!updaterSet) return;
+
+            const updaters = [];
+            Array.from(updaterSet)
+                .filter(t => t.file.basename.startsWith(
+                    `${templateInfo.file.basename}.${type}.`
+                ))
+                ?.forEach(t => updaters.push({
+                    version: Number(t.file.basename.match(
+                        new RegExp(String.raw`\.${type}\.(\d+)$`)
+                    )[1]),
+                    exist: true,
+                    link: dc.fileLink(t.file.path),
+                }));
+            
+            // Versions with existing note, but missing updater
+            templateInfo.existingVersions.forEach((version: number) => {
+                if (updaters.some(u => u.version === version)) return;
+                updaters.push({
+                    version,
+                    exist: false,
+                    link: dc.fileLink(templateInfo.file.path.replace(
+                        /\.md$/,
+                        `.${type}.${version}.md`
+                    )),
+                })
+            });
+
+            updaters.sort((a, b) => a.version - b.version);
+            return updaters;
+        }
+
+        new obsidian.Setting(this.contentEl).setName("Parser templates").setHeading();
+        dc.render(
+            UpdaterTemplates,
+            { updaters: getUpdaters("parse")},
+            this.contentEl.createDiv("setting-item"),
+        );
+
+        new obsidian.Setting(this.contentEl).setName("Composer templates").setHeading();
+        dc.render(
+            UpdaterTemplates,
+            { updaters: getUpdaters("compose")},
+            this.contentEl.createDiv("setting-item"),
+        );
+    }
+}
+
+function UpdaterTemplates({ updaters }) {
+    return (
+        <List className="updater-templates">
+        {
+            updaters.map(updater => (
+                <ListItem
+                    link={updater.link}
+                    selfHandle
+                    className="updater-template"
+                >
+                    {updater.link.displayOrDefault()}
+                    {
+                        !updater.exist &&
+                        // <dc.Icon icon="alert-triangle" className="missing" />
+                        <span className="missing">Missing</span>
+                    }
+                </ListItem>
+            ))
+        }
+        </List>
+    )
+}
+
+function ViewUpdatersButton({ templateInfo }) {
+    return (
+        <Button
+            className="view-parser"
+            onclick={() => new ViewUpdatersModal(templateInfo).open()}
+        >
+            View template updaters
+        </Button>
+    )
+}
+
 function UpdateAllButton({ templateInfo }) {
     const [isUpdating, setIsUpdating] = useState(false);
     return (
@@ -410,7 +544,11 @@ function TemplateDetail({ templateInfo }) {
                 updatable={templateInfo.notes.updatable.size}
                 outdated={templateInfo.notes.outdated.size}
             />
-            <UpdateAllButton templateInfo={templateInfo} />
+            <div className="actions">
+                <OpenTemplateButton templateInfo={templateInfo} />
+                <ViewUpdatersButton templateInfo={templateInfo} />
+                <UpdateAllButton templateInfo={templateInfo} />
+            </div>
             <NoteList templateInfo={templateInfo} />
         </div>
     )
@@ -418,5 +556,8 @@ function TemplateDetail({ templateInfo }) {
 
 return {
     TemplatesOverview,
-    TemplateDetail,  // Export so it can be discovered in scriptCache then wrapped
+
+    // Export to make it available to dc.render
+    TemplateDetail,
+    UpdaterTemplates,
 };

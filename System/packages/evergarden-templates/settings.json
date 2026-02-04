@@ -7,6 +7,11 @@
         "type": "frontmatter",
         "key": "template/version"
     },
+    "openTemplateWith": "vscode",
+    "templates": {
+        "parser": "system.template.parse",
+        "composer": "system.template.compose"
+    },
     "friend": {
         "violet-core": {
             "customjs": {
@@ -18,6 +23,11 @@
         "violet-datacore": {
             "folders": [
                 "datacore"
+            ]
+        },
+        "violet-templater": {
+            "folders": [
+                "templates"
             ]
         }
     }

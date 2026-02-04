@@ -19,6 +19,17 @@
         display: none;
     }
 
+    .header {
+        display: flex;
+        margin-bottom: var(--size-4-2);
+
+        .title {
+            font-weight: var(--h1-weight);
+            font-size: var(--font-ui-large);
+            margin-right: auto;
+        }
+    }
+
     .datacore-table-group-header .template-source {
         display: flex;
         align-items: center;
@@ -162,9 +173,15 @@
         }
     }
 
-    .update-all {
+    .actions {
         display: flex;
-        margin-left: auto;
+        margin: var(--size-4-2) 0;
+        gap: var(--size-4-2);
+
+        .update-all {
+            display: flex;
+            margin-left: auto;
+        }
     }
 
     .note-list {
@@ -201,5 +218,12 @@
                 background-color: unset;
             }
         }
+    }
+}
+
+.evergarden.updater-templates {
+    .updater-template .missing {
+        margin-left: auto;
+        color: var(--text-faint);
     }
 }

@@ -7,9 +7,13 @@ class Templates extends VPS.Package {
         return this.config.frontmatter[setting];
     }
 
+    getOpenTemplateApp() {
+        return this.config.openTemplateWith;
+    }
+
     onload() {
         this.loadSettings();
-        this.config = this.settings;
+        this._buildConfig();
         this.registerEvent(this.settings.on("update", (packageId, update) => {
             if (packageId === this.packageId)
                 Object.assign(this.config, update);
@@ -17,6 +21,75 @@ class Templates extends VPS.Package {
         this.onPackageReady("violet-templater", "Templater", (Templater) => {
             this.Templater = Templater;
         });
+        this._registerUpdaterCreate();
+        this.addSettingTab(new this.EvergardenTemplatesSettingTab(this.app, this));
+    }
+
+    _buildConfig() {
+        const settings = this.settings;
+        const DEFAULT_CONFIG = {
+            openTemplateWith: "obsidian",
+            frontmatter: {
+                template: "template/name",
+                templateVersion: "template/version",
+            },
+        };
+
+        let parser, composer;
+        const checkParser = (file) => {
+            if (parser) return;
+            if (file.basename === settings.templates.parser) parser = file;
+        }
+        const checkComposer = (file) => {
+            if (composer) return;
+            if (file.basename === settings.templates.composer) composer = file;
+        }
+        settings?.friend?.['violet-templater']?.files?.forEach((path) => {
+            const file = this.app.vault.getFileByPath(`${this.path}/${path}`);
+            if (!file instanceof obsidian.TFile) return;
+            checkParser(file);
+            checkComposer(file);
+        });
+        settings?.friend?.['violet-templater']?.folders?.forEach((path) => {
+            const folder = this.app.vault.getFolderByPath(`${this.path}/${path}`);
+            if (!folder instanceof obsidian.TFolder) return;
+            obsidian.Vault.recurseChildren(folder, (file) => {
+                checkParser(file);
+                checkComposer(file);
+            });
+        });
+
+        this.config = Object.assign(
+            DEFAULT_CONFIG,
+            {
+                openTemplateWith: settings.openTemplateWith,
+                frontmatter: {
+                    template: settings.template.key,
+                    templateVersion: settings.templateVersion.key,
+                },
+                templates: { parser, composer },
+            }
+        );
+    }
+
+    /**
+     * Handle parser and composer create, because violet-templater will skip if
+     * target file itself is a template.
+     */
+    _registerUpdaterCreate() {
+        this.registerEvent(this.app.vault.on('create', async (file) => {
+            let template;
+            if (file.basename.match(/\.parse\.(\d+)$/)) {
+                template = this.config.templates.parser;
+            } else if (file.basename.match(/\.compose\.(\d+)$/)) {
+                template = this.config.templates.composer;
+            }
+            if (!template) return;
+            await this.Templater.plugin.templater.write_template_to_file(
+                template,
+                file
+            );
+        }));
     }
 
     /**
@@ -265,6 +338,123 @@ class Templates extends VPS.Package {
             this.setFrontMatter({
                 [this.Templates.getFrontmatterKey('templateVersion')]: version,
             });
+        }
+    }
+
+    EvergardenTemplatesSettingTab = class EvergardenTemplatesSettingTab extends VPS.PackageSettingTab {
+        constructor(app, packageInstance) {
+            super(app, packageInstance);
+        }
+
+        display() {
+            function replaceEventListener(text) {
+                // Avoid fire `onChange` for every keystroke
+                const originalInputEl = text.inputEl;
+                text.inputEl = originalInputEl.parentElement.createEl(
+                    'input', {
+                        type: "text"
+                    }
+                );
+                text.inputEl.addEventListener("change", text.onChanged.bind(text));
+                text.inputEl.setAttribute("spellcheck", "false");
+                originalInputEl.remove();
+            }
+
+            const { containerEl } = this;
+            containerEl.empty();
+
+            new obsidian.SettingGroup(containerEl)
+                .addSetting(setting => {
+                    setting
+                        .setName("App for opening templates")
+                        .setDesc("Select the app to open templates with.")
+                        .addDropdown(dropdown => {
+                            const instance = this.packageInstance;
+                            const settings = instance.settings;
+                            dropdown
+                                .addOptions({
+                                    obsidian: "Obsidian",
+                                    vscode: "Visual Studio Code",
+                                })
+                                .setValue(settings.openTemplateWith)
+                                .onChange(async (value) => {
+                                    settings.openTemplateWith = value;
+                                    await instance.saveSettings(settings);
+                                })
+                        })
+                })
+
+            new obsidian.SettingGroup(containerEl)
+                .setHeading("Frontmatter")
+                .addSetting(setting => {
+                    setting
+                        .setName("Template link")
+                        .setDesc("Name of the property used to store a link to the template that generated the note.")
+                        .addText(text => {
+                            replaceEventListener(text);
+                            const instance = this.packageInstance;
+                            const settings = instance.settings;
+                            text.setPlaceholder("Property name")
+                                .setValue(settings.template.key)
+                                .onChange(async (value) => {
+                                    settings.template.key = value;
+                                    await instance.saveSettings(settings);
+                                });
+                        })
+                })
+                .addSetting(setting => {
+                    setting
+                        .setName("Template version")
+                        .setDesc("Name of the property used to store the template version at the time the note was generated.")
+                        .addText(text => {
+                            replaceEventListener(text);
+                            const instance = this.packageInstance;
+                            const settings = instance.settings;
+                            text.setPlaceholder("Property name")
+                                .setValue(settings.templateVersion.key)
+                                .onChange(async (value) => {
+                                    settings.templateVersion.key = value;
+                                    await instance.saveSettings(settings);
+                                });
+                        })
+                })
+
+            new obsidian.SettingGroup(containerEl)
+                .setHeading("Updater templates")
+                .addSetting(setting => {
+                    setting
+                        .setName("Parser template")
+                        .setDesc("File to be used as a Templater template for parser templates.")
+                        .addSearch(search => {
+                            replaceEventListener(search);
+                            const instance = this.packageInstance;
+                            const settings = instance.settings;
+                            search
+                                .setPlaceholder("Template file")
+                                .setValue(settings.templates.parser)
+                                .onChange(async (value) => {
+                                    settings.templates.parser = value;
+                                    await instance.saveSettings(settings);
+                                })
+                        })
+                })
+                .addSetting(setting => {
+                    setting
+                        .setName("Composer template")
+                        .setDesc("File to be used as a Templater template for composer templates.")
+                        .addSearch(search => {
+                            replaceEventListener(search);
+                            const instance = this.packageInstance;
+                            const settings = instance.settings;
+                            search
+                                .setPlaceholder("Template file")
+                                .setValue(settings.templates.composer)
+                                .onChange(async (value) => {
+                                    settings.templates.composer = value;
+                                    await instance.saveSettings(settings);
+                                })
+                        })
+                })
         }
     }
 }
