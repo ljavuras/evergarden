@@ -9,5 +9,5 @@ if (!parsed) return;
 
 tR = parsed.frontmatter + parsed.content;
 
-tp.setVersion(4);
+tp.setVersion();
 //-%>

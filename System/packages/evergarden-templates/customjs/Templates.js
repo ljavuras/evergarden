@@ -250,7 +250,17 @@ class Templates extends VPS.Package {
             return this.parsed?.[this.config.target_file.path];
         }
 
-        setVersion(version) {
+        setVersion() {
+            const version = Number(
+                this.config.template_file.basename
+                    .match(/.+\.compose\.(\d+)$/)?.group[1]
+            );
+            if (Number.isNaN(version)) {
+                throw new Error(
+                    "[Package] evergarden-templates:\n" +
+                    "EvergardenTemplatesInlinAPI.setVersion: Failed to parse version number from template file."
+                );
+            }
             this.setFrontMatter({
                 [this.Templates.getFrontmatterKey('templateVersion')]: version,
             });
