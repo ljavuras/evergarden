@@ -81,7 +81,17 @@
 
 .evergarden.template-detail {
 
+    .name {
+        color: var(--text-normal);
+        font-size: var(--font-ui-medium);
+        line-height: var(--line-height-tight);
+        padding-bottom: var(--size-4-1);
+    }
+
     .excerpt {
+        color: var(--text-muted);
+        font-size: var(--font-ui-smaller);
+        line-height: var(--line-height-tight);
         margin-bottom: var(--size-4-4);
     }
 
@@ -164,32 +174,31 @@
         border: unset;
 
         .note {
+            position: relative;
             display: flex;
-            margin-bottom: var(--size-2-1);
             color: var(--text-muted);
-            font-size: var(--font-smaller);
-            text-decoration: none;
-            border-radius: var(--radius-s);
-            cursor: default;
+            padding-right: calc(18px + 2*var(--size-2-3));
 
             .title, .version {
-                padding: var(--size-4-1) var(--size-4-2);
                 white-space: nowrap;
             }
             .title {
                 min-width: 0;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                margin-right: auto;
             }
-            .version {
-                margin-left: auto;
+
+            .update-note {
+                position: absolute;
+                right: 0;
+                top: 0;
             }
 
             /* Respond when hovering only on .note and not .update-note */
-            &:hover:not(:has(.update-note:hover)) {
-                text-decoration: none;
-                color: var(--text-normal);
-                background-color: var(--background-modifier-hover);
+            &:has(.update-note:hover) {
+                color: var(--nav-item-color);
+                background-color: unset;
             }
         }
     }

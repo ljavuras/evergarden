@@ -7,10 +7,15 @@ const { Templates } = VPS.require("evergarden-templates");
 
 const {
     Pill,
-    SelfHandledInternalLink,
     ClickableIcon,
     Button,
 } = await dc.require("evergarden-design-system", "Primitive");
+
+const {
+    List,
+    ListItem,
+} = await dc.require("evergarden-design-system", "Layout");
+
 const { useState, useEffect, useRef } = dc;
 
 const FM_TEMPLATE_NAME = Templates.getFrontmatterKey("template");
@@ -236,7 +241,7 @@ function TemplatesOverview() {
 class TemplateDetailModal extends obsidian.Modal {
     constructor(templateInfo) {
         super(app);
-        this.setTitle(templateInfo.file.basename);
+        this.setTitle("Template");
         dc.render(TemplateDetail, { templateInfo }, this.contentEl);
     }
 
@@ -251,9 +256,10 @@ function NoteList({ templateInfo }) {
         const outdated = templateInfo.notes.outdated.has(note);
         const latest = templateInfo.notes.latest.has(note);
         return (
-            <SelfHandledInternalLink
+            <ListItem
                 className="note"
                 link={note.$link}
+                selfHandle
             >
                 <span className="title">{note.$name}</span>
                 <span className="version">
@@ -284,7 +290,7 @@ function NoteList({ templateInfo }) {
                         Templates.update(app.vault.getFileByPath(note.$path));
                     }}
                 />
-            </SelfHandledInternalLink>
+            </ListItem>
         )
     };
 
@@ -296,9 +302,9 @@ function NoteList({ templateInfo }) {
         return 0;
     });
     return templateInfo.notes?.length
-    ? <div className="note-list">
+    ? <List className="note-list">
         {templateInfo.notes.map(note => <NoteRow note={note} />)}
-    </div>
+    </List>
     : <></>
 }
 
@@ -362,7 +368,7 @@ function UpdateAllButton({ templateInfo }) {
                 for (const note of templateInfo.notes.updatable) {
                     count += 1;
                     updateNotice.setMessage(
-                        `[Package] evergarden-templates\n` +
+                        `[Package] evergarden-templates\n\n` +
                         `Updating notes (${count}/${amount})\n` +
                         `Template: ${templateInfo.file.basename}\n` +
                         `File: ${note.$name}.${note.$extension}`
@@ -370,6 +376,7 @@ function UpdateAllButton({ templateInfo }) {
                     await Templates.update(app.vault.getFileByPath(note.$path));
                 }
                 updateNotice.noticeEl.removeClass("is-loading");
+                updateNotice.noticeEl.addClass("mod-success");
                 setIsUpdating(false);
                 setTimeout(() => { updateNotice.hide() }, 4000);
                 new obsidian.Notice(
@@ -395,6 +402,7 @@ function TemplateDetail({ templateInfo }) {
 
     return (
         <div className="evergarden template-detail markdown-rendered">
+            <div className="name">{templateInfo.file.basename}</div>
             <div className="excerpt">{templateInfo.excerpt}</div>
             {summary}
             <TemplateProgress

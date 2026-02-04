@@ -1,0 +1,21 @@
+.evergarden.list-item {
+    padding: var(--size-4-1) var(--size-4-2);
+    margin: 0;
+    margin-bottom: var(--nav-item-margin-bottom);
+    font-size: max(var(--font-ui-small), var(--font-smaller));
+    line-height: var(--line-height-tight);
+    font-weight: var(--nav-item-weight);
+    color: var(--nav-item-color);
+    border-radius: var(--nav-item-radius);
+    
+    &.is-clickable {
+        text-decoration: none;
+        cursor: var(--cursor);
+    
+        &:hover {
+            color: var(--nav-item-color-hover);
+            background-color: var(--nav-item-background-hover);
+            font-weight: var(--nav-item-weight-hover);
+        }
+    }
+}
