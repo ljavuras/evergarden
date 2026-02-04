@@ -2,7 +2,8 @@
  * @author Ljavuras <ljavuras.py@gmail.com>
  */
 
-const { obsidian, app, Script, Templates } = await cJS();
+const { obsidian, app, Script } = await cJS();
+const { Templates } = VPS.require("evergarden-templates");
 
 const {
     Pill,
@@ -16,20 +17,20 @@ const FM_TEMPLATE_NAME = Templates.getFrontmatterKey("template");
 const FM_TEMPLATE_VERSION = Templates.getFrontmatterKey("templateVersion");
 
 /** Group header, grouping templates from the same package or plugin */
-function TemplateSource({ info } : { info: {type: string, name: string} }) {
-    if (!info) return;
-    const name = info.type === "package"
-        ? globalThis.VPS.getPackageNameById(info.name)
-        : app.plugins.plugins[info.name].manifest.name;
-    const path = (info.type === "plugin" && info.name === "templater-obsidian")
-        ? app.plugins.plugins[info.name].settings.templates_folder
+function TemplateSource({ source } : { source: {type: string, id: string} }) {
+    if (!source) return;
+    const name = source.type === "package"
+        ? globalThis.VPS.getPackageNameById(source.id)
+        : app.plugins.plugins[source.id].manifest.name;
+    const path = (source.type === "plugin" && source.id === "templater-obsidian")
+        ? app.plugins.plugins[source.id].settings.templates_folder
         : null;
     return (
         <div className="template-source">
-            <Pill>{info.type}</Pill>
+            <Pill>{source.type}</Pill>
             <span className="name">{name}</span>
             {path? <code className="path">{path}</code> : <></>}
-            <span className="id">{info.name}</span>
+            <span className="id">{source.id}</span>
         </div>
     )
 }
@@ -193,10 +194,7 @@ function TemplatesOverview() {
     const templateInfos = useTemplateInfo();
     const groupedTemplateInfo = dc.useArray(
             templateInfos,
-            array => (array.groupBy(template => template.pluginId
-                ? {type: "plugin", name: template.pluginId}
-                : {type: "package", name: template.packageId}
-            ))
+            array => array.groupBy(template => template.source)
         );
 
     const ROWS = groupedTemplateInfo;
@@ -229,7 +227,7 @@ function TemplatesOverview() {
             <dc.Table
                 rows={ROWS}
                 columns={COLUMNS}
-                groupings={key => <TemplateSource info={key} />}
+                groupings={key => <TemplateSource source={key} />}
             />
         </div>
     )

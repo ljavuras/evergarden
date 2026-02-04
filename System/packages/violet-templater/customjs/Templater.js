@@ -85,7 +85,10 @@ class Templater extends customJS.Violet.Package {
         // Plugin Templater settings
         if (this.config.plugin.folder) {
             this.config.folders.push({
-                pluginId: "templater-obsidian",
+                source: {
+                    type: "plugin",
+                    id: "templater-obsidian",
+                },
                 path: this.config.plugin.folder
             })
         }
@@ -94,16 +97,16 @@ class Templater extends customJS.Violet.Package {
             // Package template files
             this.config.files = this.config.files.concat(
                 setting.files?.map(path => ({
-                    packageId: id, 
-                    path: this.getPackage(id).path + '/' + path
+                    source: { type: "package", id }, 
+                    path: this._getPackageSubFolder(id, path),
                 })) ?? []
             );
 
             // Package template folders
             this.config.folders = this.config.folders.concat(
                 setting.folders?.map(path => ({
-                    packageId: id,
-                    path: this.getPackage(id).path + '/' + path
+                    source: { type: "package", id },
+                    path: this._getPackageSubFolder(id, path),
                 })) ?? []
             );
         }
@@ -214,31 +217,25 @@ class Templater extends customJS.Violet.Package {
         // Cache hit
         if (!refresh && this.templates) { return this.templates; }
 
-        let templateItems = this.config.files.map(
-            item => {
-                item.file = customJS.Obsidian.vault.getFile(item.path);
-                delete item.path;
-                return item;
-            }
+        let templateItems = this.config.files.map(t => ({
+                source: t.source,
+                file: app.vault.getFileByPath(t.path),
+            })
         );
-        let inFolderTemplates = this.config.folders.reduce(
-            (templates, folderItem) => {
-                return templates.concat(
+        let inFolderTemplates = this.config.folders
+        .map((t) => 
                     customJS.Obsidian.vault
-                    .getFilesFromFolder(folderItem.path)
-                    .map(templateFile => {
-                        let templateItem = Object.assign({}, folderItem);
-                        templateItem.file = templateFile;
-                        delete templateItem.path;
-                        return templateItem;
-                    })
-                )
-            }, []
+            .getFilesFromFolder(t.path)
+            .map(file => ({
+                source: t.source,
+                file,
+            }))
         )
-        templateItems = templateItems.concat(inFolderTemplates);
-        templateItems.sort((aItem, bItem) => {
-            return aItem.file.basename.localeCompare(bItem.file.basename);
-        });
+        .flat();
+        templateItems = templateItems.concat(inFolderTemplates ?? []);
+        templateItems.sort(
+            (a, b) => a.file.basename.localeCompare(b.file.basename)
+        );
         this.templates = templateItems;
         return templateItems;
     }
