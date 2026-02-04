@@ -131,8 +131,8 @@ class Datacore extends customJS.Violet.Package {
             delete this.config.scripts[folderItem.packageId]?.[scriptName];
         }
 
-        if (vaultEvent === 'create') addFile(file)
-        else if (vaultEvent === 'delete') deletePath(file.path)
+        if (vaultEvent === 'create') addFile(file);
+        else if (vaultEvent === 'delete') deletePath(file.path);
         else if (vaultEvent === 'rename') {
             deletePath(oldPath);
             addFile(file);
@@ -253,7 +253,6 @@ class Datacore extends customJS.Violet.Package {
          * @returns {any}
          */
         async require(pathOrPackage, scriptName) {
-            const packageName = scriptName? pathOrPackage : null;
             const scriptPath = scriptName
                 ? await this.violetDatacore.getScriptPath(pathOrPackage, scriptName)
                 // Convert Link to string
@@ -280,19 +279,27 @@ class Datacore extends customJS.Violet.Package {
 
             const { h } = this.preact;
 
-            function wrapComponent(Component) {
-                if (typeof Component === "function") {
-                    return ({[Component.name]: ({ ...props }) =>
+            function wrapComponent(obj) {
+                if (typeof obj === "function") {
+                    const c = obj.name[0];
+                    // Function Component
+                    if (c === c.toUpperCase()) {
+                        return ({[obj.name]: ({ ...props }) =>
                         h(Wrapper, {
                             pkg: pkg,
-                            component: Component,
+                                component: obj,
                             scriptPath: scriptPath,
                             ...props
                         })
-                    })[Component.name];  // Return a named function
+                        })[obj.name];  // Return a named function
+                    }
+                    // Regular function
+                    else {
+                        return obj;
+                    }
                 } else {
                     let scriptObject = {}
-                    for (const [key, value] of Object.entries(Component)) {
+                    for (const [key, value] of Object.entries(obj)) {
                         scriptObject[key] = wrapComponent(value);
                     }
                     return scriptObject;
