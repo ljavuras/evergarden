@@ -198,6 +198,10 @@ class Violet extends obsidian.Component {
         this.Package.prototype.saveSettings.call(this);
     }
 
+    openSettings() {
+        this.Package.prototype.openSettings.call(this);
+    }
+
     /**
      * Spawn packages' CustomJS instance, and mount as child componenet.
      */
@@ -298,6 +302,151 @@ class Violet extends obsidian.Component {
     deconstructor() {
         this.unload();
         delete window.VPS;
+    }
+
+    setting = new class extends obsidian.Modal {
+        packageTabs = [];
+        activeTab = null;
+        lastTabId = "";
+
+        constructor(app) {
+            super(app);
+
+            this.modalEl.addClass("mod-settings", "mod-sidebar-layout");
+            this.updateModalTitle();
+            this.contentEl.addClass("vertical-tabs-container");
+            this.tabHeadersEl = this.contentEl.createDiv("vertical-tab-header", el => {
+                if (obsidian.Platform.isPhone) {
+                    // this.feedbackBanner = new Aee(this.app, el);
+                }
+                el.createDiv({
+                    cls: "vertical-tab-header-group-title",
+                    text: "Packages",
+                });
+                this.tabContainer = el.createDiv("vertical-tab-header-group-items");
+            });
+            this.tabContentContainer = this.contentEl.createDiv("vertical-tab-content-container");
+        }
+
+        addSettingTab(settingTab) {
+            if (!settingTab.navEl) {
+                const navEl = createDiv("vertical-tab-nav-item tappable");
+                navEl.setAttr("data-setting-id", settingTab.id);
+                if (settingTab.icon) {
+                    navEl.createDiv(
+                        "vertical-tab-nav-item-icon",
+                        el => obsidian.setIcon(el, settingTab.icon)
+                    );
+                }
+                navEl.createDiv({
+                    cls: "vertical-tab-nav-item-title",
+                    text: settingTab.name,
+                });
+                navEl.createDiv(
+                    "vertical-tab-nav-item-chevron",
+                    el => obsidian.setIcon(el, "lucide-chevron-right")
+                );
+                navEl.addEventListener("click", () => this.openTab(settingTab));
+                settingTab.navEl = navEl;
+            }
+            this.packageTabs.push(settingTab);
+            this.tabContainer.appendChild(settingTab.navEl);
+            this.updatePluginSection();
+        }
+
+        removeSettingTab(settingTab) {
+            this.packageTabs.remove(settingTab);
+            if (this.activeTab && this.activeTab === settingTab) {
+                this.closeActiveTab();
+                this.updatePluginSection();
+            }
+        }
+
+        openTab(settingTab) {
+            this.tabContentContainer.empty();
+            this.updateModalTitle();
+            if (this.activeTab) {
+                this.activeTab.navEl.removeClass("is-active");
+                this.activeTab.hide();
+            }
+            const prevActiveTab = this.activeTab;
+            this.activeTab = settingTab
+            this.lastTabId = settingTab.id;
+            settingTab.navEl.addClass("is-active");
+            this.tabContentContainer.appendChild(settingTab.containerEl);
+            this.titleEl.createDiv({
+                cls: "clickable-icon modal-setting-back-button mod-raised",
+                prepend: true,
+            },
+                (el) => {
+                    el.addEventListener("click", () => this.closeActiveTab());
+                    obsidian.setIcon(el, "lucide-arrow-left");
+                }
+            );
+            if (obsidian.Platform.isPhone && !prevActiveTab) {
+                // Qv(this.tabHeadersEl);
+                // xl(this.contentEl, this.tabContentContainer, "right");
+            } else {
+                this.contentEl.appendChild(this.tabContentContainer);
+            }
+            settingTab.display();
+        }
+
+        closeActiveTab() {
+            if (!this.activeTab) return;
+            const closeActiveTab = () => {
+                this.tabContentContainer.empty();
+                this.activeTab.navEl.removeClass("is-active");
+                this.activeTab.hide();
+                this.updateModalTitle();
+            };
+            if (obsidian.Platform.isPhone
+                && this.contentEl.isShown()
+                && this.activeTab.containerEl.isShown()
+            ) {
+                // xl(this.contentEl, this.tabHeadersEl, "left", closeActiveTab);
+            } else {
+                this.contentEl.setChildrenInPlace([this.tabHeadersEl]);
+                closeActiveTab();
+            }
+            // Zv(this.tabHeadersEl);
+            this.activeTab = null;
+        }
+
+        openTabById(id) {
+            for (const tab of this.packageTabs) {
+                if (tab.id === id) {
+                    this.open();
+                    this.openTab(tab);
+                    break;
+                }
+            }
+        }
+
+        updateModalTitle(settingTab) {
+            this.titleEl.empty();
+            if (settingTab) {
+                this.titleEl.setText(settingTab.name);
+            } else {
+                this.titleEl.setText("Packages");
+            }
+        }
+
+        updatePluginSection() {
+            this.packageTabs.sort((a, b) => a.name.localeCompare(b.name));
+            this.tabContainer.setChildrenInPlace(this.packageTabs.map(s => s.navEl));
+        }
+    }(this.app);
+
+    PackageSettingTab = class PackageSettingTab extends obsidian.SettingTab {
+        constructor(app = null, packageInstance) {
+            super(app, VPS.setting);
+            this.packageInstance = packageInstance;
+            this.name = packageInstance.manifest.name;
+            this.id = packageInstance.manifest.id;
+        }
+
+        hide() {}
     }
 
     /**
@@ -507,6 +656,10 @@ class Violet extends obsidian.Component {
             await this.VPS.packages[this.packageId].settings.save(settings);
         }
 
+        openSettings() {
+            this.VPS.setting.openTabById(this.packageId);
+        }
+
         onPackageReady(packageId, className, callback) {
             this.VPS.registerOnReady(packageId, className, callback);
             this.register(() => {
@@ -544,6 +697,11 @@ class Violet extends obsidian.Component {
             customJS.app.commands.removeCommand(
                 `violet:${this.packageId}:${commandId}`
             );
+        }
+
+        addSettingTab(settingTab) {
+            this.VPS.setting.addSettingTab(settingTab);
+            this.register(() => VPS.setting.removeSettingTab(settingTab));
         }
 
         /**
