@@ -45,6 +45,7 @@ class Templater extends customJS.Violet.Package {
         this.commands.forEach(cmd => this.addCommand(cmd));
         this.getTemplates(true);
         this._watchTemplateUpdate();
+        this._watchSettingsUpdate();
     }
 
     commands = [
@@ -69,6 +70,14 @@ class Templater extends customJS.Violet.Package {
             }
         },
     ]
+
+    _getPackageSubFolder(packageId, path) {
+        // Empty string, package root
+        if (path.length === 0)
+            return this.getPackage(packageId).path
+
+        return `${this.getPackage(packageId).path}/${path}`;
+    }
 
     _buildConfig() {
         const settings = this.settings;
@@ -109,6 +118,55 @@ class Templater extends customJS.Violet.Package {
                     path: this._getPackageSubFolder(id, path),
                 })) ?? []
             );
+        }
+    }
+
+    _refreshConfig(packageId, update) {
+        const clearConfigFiles = (packageId) => {
+            this.config.files = this.config.files.filter(
+                t => t.source.id !== packageId
+            );
+        }
+
+        const clearConfigFolders = (packageId) => {
+            this.config.folders = this.config.folders.filter(
+                t => t.source.id !== packageId
+            );
+        }
+
+        if (update === undefined) {
+            clearConfigFiles(packageId);
+            clearConfigFolders(packageId);
+            return;
+        }
+
+        if (packageId === this.packageId
+            && Object.hasOwn(update, 'overrideTemplaterOnCreate')
+        ) {
+            this.config.overrideTemplaterOnCreate = update.overrideTemplaterOnCreate;
+        }
+
+        // Cache changed plugin settings
+        const friendSettings = this.settings.all[packageId];
+
+        if (Object.hasOwn(update, 'files')) {
+            clearConfigFiles(packageId);
+            for (const path of friendSettings.files) {
+                this.config.files.push({
+                    source: { type: "package", id: packageId },
+                    path: this._getPackageSubFolder(packageId, path),
+                });
+            }
+        }
+
+        if (Object.hasOwn(update, 'folders')) {
+            clearConfigFolders(packageId);
+            for (const path of friendSettings.folders) {
+                this.config.folders.push({
+                    source: { type: "package", id: packageId },
+                    path: this._getPackageSubFolder(packageId, path),
+                });
+            }
         }
     }
 
@@ -209,6 +267,15 @@ class Templater extends customJS.Violet.Package {
         }));
     }
 
+    _watchSettingsUpdate() {
+        this.registerEvent(
+            this.settings.on('update', (packageId, update) => {
+                this._refreshConfig(packageId, update);
+                this._refreshTemplates(packageId);
+            })
+        );
+    }
+
     /**
      * Get all templates, including deprecated, system and update templates
      * @returns {Object[]}
@@ -238,6 +305,31 @@ class Templater extends customJS.Violet.Package {
         );
         this.templates = templateItems;
         return templateItems;
+    }
+
+    _refreshTemplates(packageId) {
+        this.templates = this.templates.filter(t => t.source.id !== packageId);
+        this.templates = this.templates
+        .concat(
+            this.config.files
+            .filter(t => t.source.id === packageId)
+            .map(t => ({
+                source: t.source,
+                file: app.vault.getFileByPath(t.path)
+            })) ?? []
+        )
+        .concat(
+            this.config.folders
+            .filter(t => t.source.id === packageId)
+            .map(t => customJS.Obsidian.vault
+                .getFilesFromFolder(t.path)
+                .map(file => ({ source: t.source, file }))
+            )
+            .flat() ?? []
+        );
+        this.templates.sort(
+            (a, b) => a.file.basename.localeCompare(b.file.basename)
+        );
     }
 
     /**
