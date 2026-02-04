@@ -4,11 +4,16 @@
 
 const { app, obsidian } = await cJS();
 
+const { Datacore } = VPS.require("violet-datacore");
+dc = Datacore.wrap(dc);
+
+const { combineClasses } = await dc.require("evergarden-design-system", "utils");
+
 function InternalLink({ link, className, children, ...props }) {
     return (
         <a
             aria-label={link.displayOrDefault()}
-            className={"internal-link " + className}
+            className={combineClasses("internal-link", className)}
             target="_blank"
             rel="noopener"
             data-tooltip-position="top"
@@ -72,7 +77,7 @@ function ExternalLink({ href, className, children, ...props }) {
     return (
         <a
             rel="noopener nofollow"
-            className={"external-link " + className}
+            className={combineClasses("external-link", className)}
             href={href}
             target="_blank"
         >
@@ -84,20 +89,14 @@ function ExternalLink({ href, className, children, ...props }) {
 function Pill({ className, children, link, ...props }) {
     return (link
         ? <InternalLink
-            className={className
-                ? "evergarden pill interactive " + className
-                : "evergarden pill interactive"
-            }
+            className={combineClasses("evergarden pill interactive", className)}
             link={link}
             {...props}
         >
             {children}
         </InternalLink>
         : <span
-            className={className
-                ? "evergarden pill " + className
-                : "evergarden pill"
-            }
+            className={combineClasses("evergarden pill", className)}
             {...props}
         >
             {children}
@@ -109,18 +108,20 @@ function Button(
     { className="", mod, isLoading, children, ...props }
     : {
         className: string,
-        mod: null | "cta" | "warning" | "destructive",
+        mod: null | "cta" | "warning" | "destructive" | "cancel",
         isLoading: boolean,
         children: ComponentChildren,
         props: any
     }
 ) {
-    className += " evergarden";
-    className += mod? ` mod-${mod}` : "";
-    className += isLoading? " mod-loading": "";
     return (
         <button
-            className={className}
+            className={combineClasses(
+                "evergarden",
+                mod? ` mod-${mod}` : null,
+                isLoading? " mod-loading": null,
+                className,
+            )}
             {...props}
         >
             {children}
@@ -139,11 +140,11 @@ function ClickableIcon({
 }) {
     return (
         <div
-            className={
-                "clickable-icon " +
-                className +
-                (isActive? " is-active" : "")
-            }
+            className={combineClasses(
+                "clickable-icon ",
+                className,
+                isActive? " is-active" : "",
+            )}
             aria-disabled={disabled}
             aria-label={label}
             onClick={onClick}
